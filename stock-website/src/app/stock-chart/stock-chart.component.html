@@ -1,0 +1,9 @@
+<div>
+    <select [(ngModel)]="selectedStock" (change)="onStockSelect(selectedStock)">
+      <option *ngFor="let stock of stocks" [value]="stock.name">{{ stock.label }}</option>
+    </select>
+  
+    <!-- Add your stock chart code here, using the selectedStock property to display the appropriate data -->
+    <canvas id="myChart" width="1650" height="800"></canvas>
+  </div>
+  
