@@ -1,28 +1,51 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from "@angular/core";
+import { NgApexchartsModule } from 'ng-apexcharts';
+import {
+  ChartComponent,
+  ApexAxisChartSeries,
+  ApexChart,
+  ApexXAxis,
+  ApexTitleSubtitle
+} from "ng-apexcharts";
+
+
+export type ChartOptions = {
+  series: ApexAxisChartSeries;
+  chart: ApexChart;
+  xaxis: ApexXAxis;
+  title: ApexTitleSubtitle;
+};
 
 
 @Component({
-  selector: 'app-stock-chart',
-  templateUrl: './stock-chart.component.html',
-  styleUrls: ['./stock-chart.component.css']
+  selector: "app-stock-chart",
+  templateUrl: "./stock-chart.component.html",
+  styleUrls: ["./stock-chart.component.css"]
 })
+
+
 export class StockChartComponent {
-  selectedStock: string;
+  @ViewChild("chart") chart: ChartComponent;
 
-  stocks = [
-    { name: 'AAPL', label: 'Apple Inc.' },
-    { name: 'MSFT', label: 'Microsoft Corporation' },
-    { name: 'AMZN', label: 'Amazon.com Inc.' },
-    { name: 'GOOG', label: 'Alphabet Inc.' },
-    { name: 'FB', label: 'Facebook Inc.' }
-  ];
-
-  constructor() {
-    this.selectedStock = 'AAPL'; // Initialize the property in the constructor
-  }
-
-  onStockSelect(stock: string) {
-    this.selectedStock = stock;
-    // Call a method to update the stock chart with the selected stock data
+  public chartOptions!: Partial<ChartOptions> | any;  
+  
+  constructor() {   
+    this.chartOptions = {
+      series: [
+        {
+          data: [10, 41, 35, 51, 49, 62, 69, 91, 148]
+        }
+      ],
+      chart: {
+        height: 350,
+        type: "bar"
+      },
+      title: {
+        text: "My First Angular Chart"
+      },
+      xaxis: {
+        categories: ["Jan", "Feb",  "Mar",  "Apr",  "May",  "Jun",  "Jul",  "Aug", "Sep"]
+      }
+    };
   }
 }
