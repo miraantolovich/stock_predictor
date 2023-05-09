@@ -1,10 +1,71 @@
-<p>stock-chart works!</p>
+<div id="choices">
+    <label for="graphType">Graph Type:&nbsp;</label>
+    <select id="graphType" [(ngModel)]="selectedGraphType" (ngModelChange)="updateGraphType()">
+      <option *ngFor="let graphType of graphTypes" [value]="graphType">{{ graphType | titlecase }}</option>
+    </select>
+    &nbsp;&nbsp;&nbsp; 
+    &nbsp;&nbsp;&nbsp; 
+    &nbsp;&nbsp;&nbsp; 
+    &nbsp;&nbsp;&nbsp; 
+    &nbsp;&nbsp;&nbsp; 
+    &nbsp;&nbsp;&nbsp; 
+
+    <label for="stockType">Stock:&nbsp;</label>
+    <select id="stockType" [(ngModel)]="selectedStockType" (ngModelChange)="updateStockType()">
+      <option *ngFor="let stockType of stockTypes" [value]="stockType">{{ stockType | uppercase }}</option>
+    </select>
+    &nbsp;&nbsp;&nbsp; 
+    &nbsp;&nbsp;&nbsp; 
+    &nbsp;&nbsp;&nbsp; 
+    &nbsp;&nbsp;&nbsp; 
+    &nbsp;&nbsp;&nbsp; 
+    &nbsp;&nbsp;&nbsp; 
+
+    <label>
+      <input type="checkbox" [(ngModel)]="showSMA" (ngModelChange)="changeChart1()">
+      SMA
+    </label>    
+    &nbsp;&nbsp;&nbsp;
+    <label>
+      <input type="checkbox" [(ngModel)]="showEMA" (ngModelChange)="changeChart1()">
+      EMA
+    </label>   
+    &nbsp;&nbsp;&nbsp;
+    <label>
+      <input type="checkbox" [(ngModel)]="showBB" (ngModelChange)="changeChart1()">
+      BB
+    </label>  
+    &nbsp;&nbsp;&nbsp; 
+    &nbsp;&nbsp;&nbsp; 
+    &nbsp;&nbsp;&nbsp; 
+    &nbsp;&nbsp;&nbsp; 
+    &nbsp;&nbsp;&nbsp; 
+    &nbsp;&nbsp;&nbsp; 
+    
+    <label for="chart2Type">Secondary Chart:&nbsp;</label>
+    <select id="chart2Type" [(ngModel)]="selectedChart2Type" (ngModelChange)="changeChart2()">
+      <option *ngFor="let chart2Type of chart2Types" [value]="chart2Type">{{ chart2Type }}</option>
+    </select>
+
+</div>
+
 <div style="text-align:center">
     <apx-chart
-      [series]="chartOptions.series"
-      [chart]="chartOptions.chart"
-      [xaxis]="chartOptions.xaxis"
-      [title]="chartOptions.title"
-    ></apx-chart>
-  </div>
+      [series]="chart1Options.series"
+      [chart]="chart1Options.chart"
+      [xaxis]="chart1Options.xaxis"
+      [yaxis]="chart1Options.yaxis"
+      [title]="chart1Options.title"
+      [markers]="commonOptions.markers">
+    </apx-chart>
+    <apx-chart
+      [series]="chart2Options.series"
+      [chart]="chart2Options.chart"
+      [xaxis]="chart2Options.xaxis"
+      [yaxis]="chart2Options.yaxis"
+      [title]="chart2Options.title"
+      [markers]="commonOptions.markers"
+      [dataLabels]="chart2Options.dataLabels">
+    </apx-chart>
+</div>
   
