@@ -1,6 +1,6 @@
 <div id="choices">
     <label for="graphType">Graph Type:&nbsp;</label>
-    <select id="graphType" [(ngModel)]="selectedGraphType" (ngModelChange)="updateGraphType()">
+    <select id="graphType" [(ngModel)]="selectedGraphType" (ngModelChange)="changeChart1()">
       <option *ngFor="let graphType of graphTypes" [value]="graphType">{{ graphType | titlecase }}</option>
     </select>
     &nbsp;&nbsp;&nbsp; 
@@ -11,7 +11,7 @@
     &nbsp;&nbsp;&nbsp; 
 
     <label for="stockType">Stock:&nbsp;</label>
-    <select id="stockType" [(ngModel)]="selectedStockType" (ngModelChange)="updateStockType()">
+    <select id="stockType" [(ngModel)]="selectedStockType" (ngModelChange)="updateBothCharts()">
       <option *ngFor="let stockType of stockTypes" [value]="stockType">{{ stockType | uppercase }}</option>
     </select>
     &nbsp;&nbsp;&nbsp; 
@@ -56,7 +56,9 @@
       [xaxis]="chart1Options.xaxis"
       [yaxis]="chart1Options.yaxis"
       [title]="chart1Options.title"
-      [markers]="commonOptions.markers">
+      [stroke]="chart1Options.stroke"
+      [markers]="commonOptions.markers"
+      [dataLabels]="chart1Options.dataLabels">
     </apx-chart>
     <apx-chart
       [series]="chart2Options.series"
@@ -65,7 +67,8 @@
       [yaxis]="chart2Options.yaxis"
       [title]="chart2Options.title"
       [markers]="commonOptions.markers"
-      [dataLabels]="chart2Options.dataLabels">
+      [dataLabels]="chart2Options.dataLabels"
+      [annotations]="chart2Options.annotations">
     </apx-chart>
 </div>
   
