@@ -71,4 +71,94 @@
       [annotations]="chart2Options.annotations">
     </apx-chart>
 </div>
-  
+
+<div id="add_details">
+  <div>
+    <h3>Earnings Estimate</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Average</th>
+          <th>Low</th>
+          <th>High</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let eestimate of additional_details.earningsEstimate">
+          <td>{{ eestimate.date }}</td>
+          <td>{{ eestimate.avg_estimate }}</td>
+          <td>{{ eestimate.low_estimate }}</td>
+          <td>{{ eestimate.high_estimate }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div>
+    <h3>Revenue Estimate</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Average</th>
+          <th>Low</th>
+          <th>High</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let restimate of additional_details.revenueEstimate">
+          <td>{{ restimate.date }}</td>
+          <td>{{ restimate.avg_estimate }}</td>
+          <td>{{ restimate.low_estimate }}</td>
+          <td>{{ restimate.high_estimate }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div>
+    <h3>Earnings History</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Average</th>
+          <th>Actual</th>
+          <th>Difference</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let earnings of additional_details.earningsHistory">
+          <td>{{ earnings.date }}</td>
+          <td>{{ earnings.avg_estimate }}</td>
+          <td>{{ earnings.eps_actual }}</td>
+          <td>{{ earnings.difference }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div>
+    <h3>Options Chain</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Average</th>
+          <th>Actual</th>
+          <th>Difference</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let strikePrice in options_details">
+          <td>{{ options_details[strikePrice].put.last_trade_date }}</td>
+          <td>{{ strikePrice }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+
+</div>

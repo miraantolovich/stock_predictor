@@ -25,16 +25,16 @@ else:
 
 
 
-expiration_dates = ops.get_expiration_dates("aapl")
-print(expiration_dates)
-
-get_calls = ops.get_calls("aapl")
-pd.set_option('display.max_rows', None)
-pd.set_option('display.max_columns', None)
-print(get_calls)
-
-get_calls = ops.get_puts("aapl")
-print(get_calls)
+# expiration_dates = ops.get_expiration_dates("aapl")
+# print(expiration_dates)
+# 
+# get_calls = ops.get_calls("aapl")
+# pd.set_option('display.max_rows', None)
+# pd.set_option('display.max_columns', None)
+# print(get_calls)
+# 
+# get_calls = ops.get_puts("aapl")
+# print(get_calls)
 
 get_all = ops.get_options_chain("aapl")
 print(get_all)
@@ -42,3 +42,15 @@ print(get_all)
 
 get_analyst = sti.get_analysts_info("aapl")
 print(get_analyst)
+
+
+# get list of all stocks to compare
+
+# for each stock, every 24 hours:
+    # pull stock data:
+    # open, high, low, close, adjusted close, volume
+    # options chain
+    #
+    # calculate SMA, EMA, BB... RSI, %R, SO, M
+    # 
+    # put all into database

@@ -56,6 +56,115 @@ export class StockChartComponent {
   //protected stock_data = [10, 41, 35, 51, 49, 62, 69, 91, 148];
   protected x_axis_data = ["Jan", "Feb",  "Mar",  "Apr",  "May",  "Jun",  "Jul",  "Aug", "Sep"]
   protected advanced_data = [10000, 41000, 35000, 51000, 49000, 62000, 69000, 91000, 148000];
+  protected additional_details = {    
+    earningsEstimate: [
+    { date: 'Jun 2023', avg_estimate: '1.19', low_estimate: '1.14', high_estimate: '1.45' },
+    { date: 'Sep 2023', avg_estimate: '1.36', low_estimate: '1.17', high_estimate: '1.45'  },
+    { date: '2023', avg_estimate: '5.97', low_estimate: '5.43', high_estimate: '1.45'  },
+    { date: '2024', avg_estimate: '6.54', low_estimate: '5.58', high_estimate: '1.45'  },
+    ],
+    revenueEstimate: [
+      { date: 'Jun 2023', avg_estimate: '81.67B', low_estimate: '81.67B', high_estimate: '81.67B'  },
+      { date: 'Sep 2023', avg_estimate: '90.52B', low_estimate: '81.67B', high_estimate: '81.67B'  },
+      { date: '2023', avg_estimate: '384.51B', low_estimate: '81.67B', high_estimate: '81.67B'  },
+      { date: '2024', avg_estimate: '409.11B', low_estimate: '81.67B', high_estimate: '81.67B'  },
+    ],
+    earningsHistory: [
+      { date: '6/29/2022', avg_estimate: '1.16', eps_actual: '1.2', difference: '0.04'  },
+      { date: '9/29/2022', avg_estimate: '1.16', eps_actual: '1.2', difference: '0.04'  },
+      { date: '12/30/2022', avg_estimate: '1.16', eps_actual: '1.2', difference: '0.04'  },
+      { date: '3/30/2023', avg_estimate: '1.16', eps_actual: '1.2', difference: '0.04'  },
+    ]
+  }
+  protected options_details = {
+    150: 
+    {
+      put: [
+        {
+          last_trade_date: "2023-05-16 10:48AM EDT",
+          last_price: "184.05",
+          bid: "182.85",
+          ask: "183.25",
+          change: "-2.05",
+          percent_change: "-1.10%",
+          volume: "3",
+          open_interest: "4",
+          implied_volatility: "395.12%"
+        }
+      ], 
+      call: [
+        {
+          last_trade_date: "2023-05-16 10:48AM EDT",
+          last_price: "184.05",
+          bid: "182.85",
+          ask: "183.25",
+          change: "-2.05",
+          percent_change: "-1.10%",
+          volume: "3",
+          open_interest: "4",
+          implied_volatility: "395.12%"
+        }
+      ], 
+    },
+    155: 
+    {
+      put: [
+        {
+          last_trade_date: "2023-05-16 10:48AM EDT",
+          last_price: "184.05",
+          bid: "182.85",
+          ask: "183.25",
+          change: "-2.05",
+          percent_change: "-1.10%",
+          volume: "3",
+          open_interest: "4",
+          implied_volatility: "395.12%"
+        }
+      ], 
+      call: [
+        {
+          last_trade_date: "2023-05-16 10:48AM EDT",
+          last_price: "184.05",
+          bid: "182.85",
+          ask: "183.25",
+          change: "-2.05",
+          percent_change: "-1.10%",
+          volume: "3",
+          open_interest: "4",
+          implied_volatility: "395.12%"
+        }
+      ], 
+    },
+    160: 
+    {
+      put: [
+        {
+          last_trade_date: "2023-05-16 10:48AM EDT",
+          last_price: "184.05",
+          bid: "182.85",
+          ask: "183.25",
+          change: "-2.05",
+          percent_change: "-1.10%",
+          volume: "3",
+          open_interest: "4",
+          implied_volatility: "395.12%"
+        }
+      ], 
+      call: [
+        {
+          last_trade_date: "2023-05-16 10:48AM EDT",
+          last_price: "184.05",
+          bid: "182.85",
+          ask: "183.25",
+          change: "-2.05",
+          percent_change: "-1.10%",
+          volume: "3",
+          open_interest: "4",
+          implied_volatility: "395.12%"
+        }
+      ], 
+    }
+  }
   
   // chart 2 should be drop down I think
   protected chart2Types = ["Volume", "RSI", "%R", "SO", "M"];
@@ -69,6 +178,8 @@ export class StockChartComponent {
 
   // #region Constructor
   constructor() {  
+    // TODO: PULL CORRECT INITIAL DATA
+
     this.initCharts()
   }
 
@@ -91,7 +202,7 @@ export class StockChartComponent {
         }
       ],
       chart: {
-          height: 600,
+          height: 450,
           id: "main",
           type: "line",
           group: "stock"
@@ -122,7 +233,7 @@ export class StockChartComponent {
         id: "advanced",
         group: "stock",
         type: "area",
-        height: 250
+        height: 175
       },
       dataLabels: {
         enabled: false
@@ -219,7 +330,7 @@ export class StockChartComponent {
       this.chart1Options = {
         series: data_line,
         chart: {
-          height: 600,
+          height: 450,
           id: "main",
           type: "rangeArea",
           group: "stock"
@@ -232,9 +343,6 @@ export class StockChartComponent {
           labels: {
             minWidth: 60,
             maxWidth: 60
-          },
-          tooltip: {
-            enabled: false
           }
         },
         dataLabels: {
@@ -251,7 +359,7 @@ export class StockChartComponent {
       this.chart1Options = {
         series: data_line,
         chart: {
-          height: 600,
+          height: 450,
           id: "main",
           type: "line",
           group: "stock"
@@ -264,9 +372,6 @@ export class StockChartComponent {
           labels: {
             minWidth: 60,
             maxWidth: 60
-          },
-          tooltip: {
-            enabled: false
           }
         },
         dataLabels: {
@@ -307,7 +412,7 @@ export class StockChartComponent {
     this.chart1Options = {
       series: data_candle,
       chart: {
-        height: 600,
+        height: 450,
         id: "main",
         type: "candlestick",
         group: "stock"
@@ -320,9 +425,6 @@ export class StockChartComponent {
         labels: {
           minWidth: 60,
           maxWidth: 60
-        },
-        tooltip: {
-          enabled: true
         }
       },
       stroke: {
@@ -351,7 +453,7 @@ export class StockChartComponent {
           id: "advanced",
           group: "stock",
           type: "line",
-          height: 250
+          height: 175
         },
         dataLabels: {
           enabled: false
@@ -419,7 +521,7 @@ export class StockChartComponent {
           id: "advanced",
           group: "stock",
           type: "line",
-          height: 250
+          height: 175
         },
         dataLabels: {
           enabled: false
@@ -488,7 +590,7 @@ export class StockChartComponent {
           id: "advanced",
           group: "stock",
           type: "line",
-          height: 250
+          height: 175
         },
         dataLabels: {
           enabled: false
@@ -556,7 +658,7 @@ export class StockChartComponent {
           id: "advanced",
           group: "stock",
           type: "line",
-          height: 250
+          height: 175
         },
         dataLabels: {
           enabled: false
@@ -594,7 +696,7 @@ export class StockChartComponent {
           id: "advanced",
           group: "stock",
           type: "area",
-          height: 250
+          height: 175
         },
         dataLabels: {
           enabled: false
