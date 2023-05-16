@@ -22,17 +22,17 @@
     &nbsp;&nbsp;&nbsp; 
 
     <label>
-      <input type="checkbox" [(ngModel)]="showSMA" (ngModelChange)="changeChart1()">
+      <input type="checkbox" [(ngModel)]="showSMA" (ngModelChange)="changeChart1()" [disabled]="selectedGraphType == 'candle'">
       SMA
     </label>    
     &nbsp;&nbsp;&nbsp;
     <label>
-      <input type="checkbox" [(ngModel)]="showEMA" (ngModelChange)="changeChart1()">
+      <input type="checkbox" [(ngModel)]="showEMA" (ngModelChange)="changeChart1()" [disabled]="selectedGraphType == 'candle'">
       EMA
     </label>   
     &nbsp;&nbsp;&nbsp;
     <label>
-      <input type="checkbox" [(ngModel)]="showBB" (ngModelChange)="changeChart1()">
+      <input type="checkbox" [(ngModel)]="showBB" (ngModelChange)="changeChart1()" [disabled]="selectedGraphType == 'candle'">
       BB
     </label>  
     &nbsp;&nbsp;&nbsp; 

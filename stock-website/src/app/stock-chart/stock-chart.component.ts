@@ -155,6 +155,10 @@ export class StockChartComponent {
     }
     // candle
     else if (this.selectedGraphType == "candle") {
+      this.showSMA = false;
+      this.showEMA = false;
+      this.showBB = false;
+
       this.ifCandle();
     }
     else {
@@ -297,61 +301,6 @@ export class StockChartComponent {
       ],
       name: this.selectedStockType
     })
-
-    // get options 
-    if (this.showSMA) {
-      data_candle.push({
-        name: "SMA",
-        data: [{x: "Jan", y: 10}, {x: "Feb", y: 30}, {x: "Mar", y: 20}, {x: "Apr", y: 30}, 
-               {x: "May", y: 20}, {x: "Jun", y: 45}, {x: "Jul", y: 68}, {x: "Aug", y: 57}, {x: "Sep", y: 78}],
-        type: "line",
-      })
-    }
-
-    if (this.showEMA) {
-      data_candle.push({
-        name: "EMA",
-        data: [{x: "Jan", y: 10}, {x: "Feb", y: 25.8333}, {x: "Mar", y: 23.8889}, {x: "Apr", y: 32.5185}, 
-               {x: "May", y: 37.0123}, {x: "Jun", y: 45.3372}, {x: "Jul", y: 52.1124}, {x: "Aug", y: 70.7408}, {x: "Sep", y: 104.4939}],
-        type: "line"
-      })
-    }
-
-    // BB has to be two lines
-    if (this.showBB) {
-      data_candle.push({   
-          name: "Lower BB",
-          data: [
-            {x: "Jan", y: 4},
-            {x: "Feb", y: 20},
-            {x: "Mar", y: 3},
-            {x: "Apr", y: 8},
-            {x: "May", y: 13},
-            {x: "Jun", y: 18},
-            {x: "Jul", y: 21},
-            {x: "Aug", y: 21},
-            {x: "Sep", y: 17}
-          ],
-          type: "line",
-      })
-      
-      data_candle.push({   
-        name: "Upper BB",
-        data: [
-          {x: "Jan", y: 5},
-          {x: "Feb", y: 25},
-          {x: "Mar", y: 10},
-          {x: "Apr", y: 16},
-          {x: "May", y: 22},
-          {x: "Jun", y: 26},
-          {x: "Jul", y: 29},
-          {x: "Aug", y: 28},
-          {x: "Sep", y: 24}
-        ],
-        type: "line"
-      })
-
-    }
 
     // Chart has to be candlestick (change chart to candlestick)
     // y axis tooltip enabled (true)
