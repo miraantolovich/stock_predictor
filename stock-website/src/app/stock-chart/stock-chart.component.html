@@ -74,7 +74,9 @@
 
 <div id="add_details">
   <div>
-    <h3>Earnings Estimate</h3>
+    <div class="title">
+      <b>Earnings Estimate</b>
+    </div>
     <table>
       <thead>
         <tr>
@@ -96,7 +98,9 @@
   </div>
 
   <div>
-    <h3>Revenue Estimate</h3>
+    <div class="title">
+      <b>Revenue Estimate</b>
+    </div>
     <table>
       <thead>
         <tr>
@@ -118,7 +122,9 @@
   </div>
 
   <div>
-    <h3>Earnings History</h3>
+    <div class="title">
+      <b>Earnings History</b>
+    </div>
     <table>
       <thead>
         <tr>
@@ -140,25 +146,52 @@
   </div>
 
   <div>
-    <h3>Options Chain</h3>
+    <div class="title">
+      <b>Options</b>&nbsp;&nbsp;&nbsp;
+
+      <label for="optionType">Calls/Puts:&nbsp;</label>
+      <select id="optionType" [(ngModel)]="selectedOptionsType" (ngModelChange)="updateOptions()">
+        <option *ngFor="let optionType of options_type" [value]="optionType">{{ optionType }}</option>
+      </select>
+
+      &nbsp;&nbsp;&nbsp;
+
+      <label for="optionDate">Date:&nbsp;</label>
+      <select id="optionDate" [(ngModel)]="selectedOptionsDate" (ngModelChange)="updateOptions()">
+        <option *ngFor="let optionDate of options_dates" [value]="optionDate">{{ optionDate }}</option>
+      </select>
+
+    </div>
+
     <table>
       <thead>
         <tr>
-          <th>Year</th>
-          <th>Average</th>
-          <th>Actual</th>
-          <th>Difference</th>
+          <th>Strike Price</th>
+          <th>Last Price</th>
+          <th>Bid</th>
+          <th>Ask</th>
+          <th>Change</th>
+          <th>% Change</th>
+          <th>Volume</th>
+          <th>Open Int.</th>
+          <th>Implied Vol.</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let strikePrice in options_details">
-          <td>{{ options_details[strikePrice].put.last_trade_date }}</td>
-          <td>{{ strikePrice }}</td>
+        <tr *ngFor="let option of options_details">
+          <td>{{ option.strike_price }}</td>
+          <td>{{ option.last_price }}</td>
+          <td>{{ option.bid }}</td>
+          <td>{{ option.ask }}</td>
+          <td>{{ option.change }}</td>
+          <td>{{ option.percent_change }}</td>
+          <td>{{ option.volume }}</td>
+          <td>{{ option.open_interest }}</td>
+          <td>{{ option.implied_volatility }}</td>
         </tr>
       </tbody>
     </table>
   </div>
-
 
 
 </div>

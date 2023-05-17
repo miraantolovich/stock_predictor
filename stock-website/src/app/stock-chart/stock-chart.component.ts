@@ -53,9 +53,11 @@ export class StockChartComponent {
 
   protected stock_data = [{x: "Jan", y: 10}, {x: "Feb", y: 41}, {x: "Mar", y: 35}, {x: "Apr", y: 51}, {x: "May", y: 49}, {x: "Jun", y: 62}, 
                           {x: "Jul", y: 69}, {x: "Aug", y: 91}, {x: "Sep", y: 148}];
-  //protected stock_data = [10, 41, 35, 51, 49, 62, 69, 91, 148];
+
   protected x_axis_data = ["Jan", "Feb",  "Mar",  "Apr",  "May",  "Jun",  "Jul",  "Aug", "Sep"]
+  
   protected advanced_data = [10000, 41000, 35000, 51000, 49000, 62000, 69000, 91000, 148000];
+  
   protected additional_details = {    
     earningsEstimate: [
     { date: 'Jun 2023', avg_estimate: '1.19', low_estimate: '1.14', high_estimate: '1.45' },
@@ -76,96 +78,61 @@ export class StockChartComponent {
       { date: '3/30/2023', avg_estimate: '1.16', eps_actual: '1.2', difference: '0.04'  },
     ]
   }
-  protected options_details = {
-    150: 
+
+  protected options_dates = ["May", "June", "July"];
+  protected selectedOptionsDate = this.options_dates[0];
+
+  protected options_type = ["Calls", "Puts"];
+  protected selectedOptionsType = this.options_type[0];
+
+  protected options_details = [
     {
-      put: [
-        {
-          last_trade_date: "2023-05-16 10:48AM EDT",
-          last_price: "184.05",
-          bid: "182.85",
-          ask: "183.25",
-          change: "-2.05",
-          percent_change: "-1.10%",
-          volume: "3",
-          open_interest: "4",
-          implied_volatility: "395.12%"
-        }
-      ], 
-      call: [
-        {
-          last_trade_date: "2023-05-16 10:48AM EDT",
-          last_price: "184.05",
-          bid: "182.85",
-          ask: "183.25",
-          change: "-2.05",
-          percent_change: "-1.10%",
-          volume: "3",
-          open_interest: "4",
-          implied_volatility: "395.12%"
-        }
-      ], 
+      strike_price: "150",
+      last_price: "184.05",
+      bid: "182.85",
+      ask: "183.25",
+      change: "-2.05",
+      percent_change: "-1.10%",
+      volume: "3",
+      open_interest: "4",
+      implied_volatility: "395.12%",
     },
-    155: 
     {
-      put: [
-        {
-          last_trade_date: "2023-05-16 10:48AM EDT",
-          last_price: "184.05",
-          bid: "182.85",
-          ask: "183.25",
-          change: "-2.05",
-          percent_change: "-1.10%",
-          volume: "3",
-          open_interest: "4",
-          implied_volatility: "395.12%"
-        }
-      ], 
-      call: [
-        {
-          last_trade_date: "2023-05-16 10:48AM EDT",
-          last_price: "184.05",
-          bid: "182.85",
-          ask: "183.25",
-          change: "-2.05",
-          percent_change: "-1.10%",
-          volume: "3",
-          open_interest: "4",
-          implied_volatility: "395.12%"
-        }
-      ], 
+      strike_price: "155",
+      last_price: "184.05",
+      bid: "182.85",
+      ask: "183.25",
+      change: "-2.05",
+      percent_change: "-1.10%",
+      volume: "3",
+      open_interest: "4",
+      implied_volatility: "395.12%",
     },
-    160: 
     {
-      put: [
-        {
-          last_trade_date: "2023-05-16 10:48AM EDT",
-          last_price: "184.05",
-          bid: "182.85",
-          ask: "183.25",
-          change: "-2.05",
-          percent_change: "-1.10%",
-          volume: "3",
-          open_interest: "4",
-          implied_volatility: "395.12%"
-        }
-      ], 
-      call: [
-        {
-          last_trade_date: "2023-05-16 10:48AM EDT",
-          last_price: "184.05",
-          bid: "182.85",
-          ask: "183.25",
-          change: "-2.05",
-          percent_change: "-1.10%",
-          volume: "3",
-          open_interest: "4",
-          implied_volatility: "395.12%"
-        }
-      ], 
+      strike_price: "160",
+      last_price: "184.05",
+      bid: "182.85",
+      ask: "183.25",
+      change: "-2.05",
+      percent_change: "-1.10%",
+      volume: "3",
+      open_interest: "4",
+      implied_volatility: "395.12%",
     }
-  }
-  
+    ,
+    {
+      strike_price: "165",
+      last_price: "184.05",
+      bid: "182.85",
+      ask: "183.25",
+      change: "-2.05",
+      percent_change: "-1.10%",
+      volume: "3",
+      open_interest: "4",
+      implied_volatility: "395.12%",
+    }
+  ]
+
   // chart 2 should be drop down I think
   protected chart2Types = ["Volume", "RSI", "%R", "SO", "M"];
   protected selectedChart2Type = this.chart2Types[0];
@@ -179,8 +146,8 @@ export class StockChartComponent {
   // #region Constructor
   constructor() {  
     // TODO: PULL CORRECT INITIAL DATA
-
     this.initCharts()
+    // TODO: DO OPTIONS
   }
 
   public initCharts(): void {
@@ -720,6 +687,58 @@ export class StockChartComponent {
     
   }
 
+  protected updateOptions() {
+    console.log("update options");
+
+    this.options_details = [
+      {
+        strike_price: "155",
+        last_price: "184.05",
+        bid: "182.85",
+        ask: "183.25",
+        change: "-2.05",
+        percent_change: "-1.10%",
+        volume: "3",
+        open_interest: "4",
+        implied_volatility: "395.12%",
+      },
+      {
+        strike_price: "160",
+        last_price: "184.05",
+        bid: "182.85",
+        ask: "183.25",
+        change: "-2.05",
+        percent_change: "-1.10%",
+        volume: "3",
+        open_interest: "4",
+        implied_volatility: "395.12%",
+      },
+      {
+        strike_price: "165",
+        last_price: "184.05",
+        bid: "182.85",
+        ask: "183.25",
+        change: "-2.05",
+        percent_change: "-1.10%",
+        volume: "3",
+        open_interest: "4",
+        implied_volatility: "395.12%",
+      }
+      ,
+      {
+        strike_price: "170",
+        last_price: "184.05",
+        bid: "182.85",
+        ask: "183.25",
+        change: "-2.05",
+        percent_change: "-1.10%",
+        volume: "3",
+        open_interest: "4",
+        implied_volatility: "395.12%",
+      }
+    ]
+  
+  }
 
   protected updateBothCharts() {
 
