@@ -22,6 +22,11 @@
     &nbsp;&nbsp;&nbsp; 
 
     <label>
+      <input type="checkbox" [(ngModel)]="showBB" (ngModelChange)="changeChart1()" [disabled]="selectedGraphType == 'candle'">
+      BB
+    </label>  
+    &nbsp;&nbsp;&nbsp;
+    <label>
       <input type="checkbox" [(ngModel)]="showSMA" (ngModelChange)="changeChart1()" [disabled]="selectedGraphType == 'candle'">
       SMA
     </label>    
@@ -30,11 +35,8 @@
       <input type="checkbox" [(ngModel)]="showEMA" (ngModelChange)="changeChart1()" [disabled]="selectedGraphType == 'candle'">
       EMA
     </label>   
+    
     &nbsp;&nbsp;&nbsp;
-    <label>
-      <input type="checkbox" [(ngModel)]="showBB" (ngModelChange)="changeChart1()" [disabled]="selectedGraphType == 'candle'">
-      BB
-    </label>  
     &nbsp;&nbsp;&nbsp; 
     &nbsp;&nbsp;&nbsp; 
     &nbsp;&nbsp;&nbsp; 
@@ -58,7 +60,8 @@
       [title]="chart1Options.title"
       [stroke]="chart1Options.stroke"
       [markers]="commonOptions.markers"
-      [dataLabels]="chart1Options.dataLabels">
+      [dataLabels]="chart1Options.dataLabels"
+      [colors]="chart1Options.colors">
     </apx-chart>
     <apx-chart
       [series]="chart2Options.series"
@@ -68,7 +71,8 @@
       [title]="chart2Options.title"
       [markers]="commonOptions.markers"
       [dataLabels]="chart2Options.dataLabels"
-      [annotations]="chart2Options.annotations">
+      [annotations]="chart2Options.annotations"
+      [colors]="chart2Options.colors">
     </apx-chart>
 </div>
 

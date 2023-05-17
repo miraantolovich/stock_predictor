@@ -27,6 +27,7 @@ export type ChartOptions = {
   markers: ApexMarkers;
   dataLabels: ApexDataLabels;
   annotations: ApexAnnotations;
+  colors: string[];
 };
 
 @Component({
@@ -140,6 +141,11 @@ export class StockChartComponent {
   protected showSMA = false;
   protected showEMA = false;
   protected showBB = false;
+
+  protected stockColor = "#140f70"
+  protected smaColor = "#80A4ED"
+  protected emaColor = "#88527F"
+  protected bbColor = "#FAC748"
   // #endregion
 
 
@@ -165,7 +171,7 @@ export class StockChartComponent {
         {
           type: "line",
           name: this.selectedStockType,
-          data: this.stock_data
+          data: this.stock_data,
         }
       ],
       chart: {
@@ -183,7 +189,8 @@ export class StockChartComponent {
           minWidth: 60,
           maxWidth: 60
         }
-      }
+      },
+      colors: [this.stockColor],
     };
 
     this.chart2Options = {
@@ -193,6 +200,7 @@ export class StockChartComponent {
           data: this.advanced_data,
         }
       ],
+      colors: [this.stockColor],
       chart: {
         toolbar: {
           show: false,
@@ -247,31 +255,15 @@ export class StockChartComponent {
 
   private ifLine() {
     var data_line = []
+    var all_colors = []
+
     // get stock data just close
     console.log("line")
     data_line.push({
       data: this.stock_data,
       name: this.selectedStockType
     })
-
-    // get options 
-    if (this.showSMA) {
-      data_line.push({
-        name: "SMA",
-        data: [{x: "Jan", y: 10}, {x: "Feb", y: 30}, {x: "Mar", y: 20}, {x: "Apr", y: 30}, 
-               {x: "May", y: 20}, {x: "Jun", y: 45}, {x: "Jul", y: 68}, {x: "Aug", y: 57}, {x: "Sep", y: 78}],
-        type: "line"
-      })
-    }
-
-    if (this.showEMA) {
-      data_line.push({
-        name: "EMA",
-        data: [{x: "Jan", y: 10}, {x: "Feb", y: 25.8333}, {x: "Mar", y: 23.8889}, {x: "Apr", y: 32.5185}, 
-               {x: "May", y: 37.0123}, {x: "Jun", y: 45.3372}, {x: "Jul", y: 52.1124}, {x: "Aug", y: 70.7408}, {x: "Sep", y: 104.4939}],
-        type: "line"
-      })
-    }
+    all_colors.push(this.stockColor);
 
     if (this.showBB) {
       data_line.push({   
@@ -289,8 +281,29 @@ export class StockChartComponent {
             {x: "Sep", y: [17, 24]}
           ]
       })
+      all_colors.push(this.bbColor);
     }
 
+    // get options 
+    if (this.showSMA) {
+      data_line.push({
+        name: "SMA",
+        data: [{x: "Jan", y: 10}, {x: "Feb", y: 30}, {x: "Mar", y: 20}, {x: "Apr", y: 30}, 
+               {x: "May", y: 20}, {x: "Jun", y: 45}, {x: "Jul", y: 68}, {x: "Aug", y: 57}, {x: "Sep", y: 78}],
+        type: "line"
+      })
+      all_colors.push(this.smaColor);
+    }
+
+    if (this.showEMA) {
+      data_line.push({
+        name: "EMA",
+        data: [{x: "Jan", y: 10}, {x: "Feb", y: 25.8333}, {x: "Mar", y: 23.8889}, {x: "Apr", y: 32.5185}, 
+               {x: "May", y: 37.0123}, {x: "Jun", y: 45.3372}, {x: "Jul", y: 52.1124}, {x: "Aug", y: 70.7408}, {x: "Sep", y: 104.4939}],
+        type: "line"
+      })
+      all_colors.push(this.emaColor);
+    }
 
     // BB can be rangeArea (change chart to rangeArea, y axis tooltip enabled false)
     if (this.showBB) {
@@ -318,7 +331,8 @@ export class StockChartComponent {
         stroke: {
           curve: "straight",
           width: [4, 4, 4, 4, 4, 4]
-        }
+        },
+        colors: all_colors
       }; 
     }   
     // Otherwise chart is line (change chart to line,  y axis tooltip enabled false)
@@ -347,7 +361,8 @@ export class StockChartComponent {
         stroke: {
           curve: "straight",
           width: [4, 4, 4, 4, 4, 4]
-        }
+        },
+        colors: all_colors
       }; 
     }
 
