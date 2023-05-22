@@ -1,3 +1,4 @@
+# region Imports
 import requests
 import pandas as pd
 import time
@@ -6,9 +7,11 @@ from datetime import date
 
 import yahoo_fin.options as ops
 import yahoo_fin.stock_info as sti
+# endregion
+
+# region Variables
 
 # medium (monthly plays) to medium/large-cap stocks
-
 # analyst rating
 # insider trading/purchases
 
@@ -16,7 +19,7 @@ import yahoo_fin.stock_info as sti
 stock_list = ["AAPL", "GOOG"]
 
 symbol = "AAPL"
-
+# endregion
 
 # api_key = "D24NAEA1UVN44M2E"
 #
@@ -30,8 +33,7 @@ symbol = "AAPL"
 #     print(data['Time Series (Daily)'])
 # else:
 #     print("Error occurred while retrieving stock information.")
-
-pd.set_option('display.max_columns', None)
+# pd.set_option('display.max_columns', None)
 #
 # stock_data = sti.get_data(symbol, start_date="01/01/2019")
 # print(stock_data)
@@ -52,6 +54,8 @@ pd.set_option('display.max_columns', None)
 # print(get_analyst)
 
 # pull once a day, 8pm est
+
+# region Pulling Stock Data Methods
 def pull_daily():
     for stock in stock_list:
         # pull stock data:
@@ -78,13 +82,6 @@ def pull_analyst():
         print(get_analyst)
 
 
-
-# calculate once a day, after pull_daily
-def calculate_indicators():
-    # calculate SMA, EMA, BB... RSI, %R, SO, M after daily pull
-    return
-
-
 def pull_all():
 
     # check if any data exists in database
@@ -99,4 +96,46 @@ def pull_all():
 
         # store all the data to SQL
         return
+# endregion
 
+# region Indicators
+# calculate once a day, after pull_daily
+def calculate_daily_indicators():
+    # calculate SMA, EMA, BB... RSI, %R, SO, M after daily pull
+    return
+
+
+def calculate_all_indicators():
+    # calculate SMA, EMA, BB... RSI, %R, SO, M after all data is pulled
+    return
+
+
+# region Individual Indicators
+def calculate_sma():
+    return
+
+
+def calculate_ema():
+    return
+
+
+def calculate_bb():
+    return
+
+
+def calculate_rsi():
+    return
+
+
+def calculate_percent_r():
+    return
+
+
+def calculate_so():
+    return
+
+
+def calculate_momentum():
+    return
+# endregion
+# endregion
