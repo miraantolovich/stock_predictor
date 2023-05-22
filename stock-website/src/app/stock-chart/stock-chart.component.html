@@ -1,201 +1,204 @@
-<div id="choices">
-    <label for="graphType">Graph Type:&nbsp;</label>
-    <select id="graphType" [(ngModel)]="selectedGraphType" (ngModelChange)="changeChart1()">
-      <option *ngFor="let graphType of graphTypes" [value]="graphType">{{ graphType | titlecase }}</option>
-    </select>
-    &nbsp;&nbsp;&nbsp; 
-    &nbsp;&nbsp;&nbsp; 
-    &nbsp;&nbsp;&nbsp; 
-    &nbsp;&nbsp;&nbsp; 
-    &nbsp;&nbsp;&nbsp; 
-    &nbsp;&nbsp;&nbsp; 
-
-    <label for="stockType">Stock:&nbsp;</label>
-    <select id="stockType" [(ngModel)]="selectedStockType" (ngModelChange)="updateBothCharts()">
-      <option *ngFor="let stockType of stockTypes" [value]="stockType">{{ stockType | uppercase }}</option>
-    </select>
-    &nbsp;&nbsp;&nbsp; 
-    &nbsp;&nbsp;&nbsp; 
-    &nbsp;&nbsp;&nbsp; 
-    &nbsp;&nbsp;&nbsp; 
-    &nbsp;&nbsp;&nbsp; 
-    &nbsp;&nbsp;&nbsp; 
-
-    <label>
-      <input type="checkbox" [(ngModel)]="showBB" (ngModelChange)="changeChart1()" [disabled]="selectedGraphType == 'candle'">
-      BB
-    </label>  
-    &nbsp;&nbsp;&nbsp;
-    <label>
-      <input type="checkbox" [(ngModel)]="showSMA" (ngModelChange)="changeChart1()" [disabled]="selectedGraphType == 'candle'">
-      SMA
-    </label>    
-    &nbsp;&nbsp;&nbsp;
-    <label>
-      <input type="checkbox" [(ngModel)]="showEMA" (ngModelChange)="changeChart1()" [disabled]="selectedGraphType == 'candle'">
-      EMA
-    </label>   
-    
-    &nbsp;&nbsp;&nbsp;
-    &nbsp;&nbsp;&nbsp; 
-    &nbsp;&nbsp;&nbsp; 
-    &nbsp;&nbsp;&nbsp; 
-    &nbsp;&nbsp;&nbsp; 
-    &nbsp;&nbsp;&nbsp; 
-    &nbsp;&nbsp;&nbsp; 
-    
-    <label for="chart2Type">Secondary Chart:&nbsp;</label>
-    <select id="chart2Type" [(ngModel)]="selectedChart2Type" (ngModelChange)="changeChart2()">
-      <option *ngFor="let chart2Type of chart2Types" [value]="chart2Type">{{ chart2Type }}</option>
-    </select>
-
-</div>
-
-<div style="text-align:center">
-    <apx-chart
-      [series]="chart1Options.series"
-      [chart]="chart1Options.chart"
-      [xaxis]="chart1Options.xaxis"
-      [yaxis]="chart1Options.yaxis"
-      [title]="chart1Options.title"
-      [stroke]="chart1Options.stroke"
-      [markers]="commonOptions.markers"
-      [dataLabels]="chart1Options.dataLabels"
-      [colors]="chart1Options.colors">
-    </apx-chart>
-    <apx-chart
-      [series]="chart2Options.series"
-      [chart]="chart2Options.chart"
-      [xaxis]="chart2Options.xaxis"
-      [yaxis]="chart2Options.yaxis"
-      [title]="chart2Options.title"
-      [markers]="commonOptions.markers"
-      [dataLabels]="chart2Options.dataLabels"
-      [annotations]="chart2Options.annotations"
-      [colors]="chart2Options.colors">
-    </apx-chart>
-</div>
-
-<div id="add_details">
-  <div>
-    <div class="title">
-      <b>Earnings Estimate</b>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Average</th>
-          <th>Low</th>
-          <th>High</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let eestimate of additional_details.earningsEstimate">
-          <td>{{ eestimate.date }}</td>
-          <td>{{ eestimate.avg_estimate }}</td>
-          <td>{{ eestimate.low_estimate }}</td>
-          <td>{{ eestimate.high_estimate }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div>
-    <div class="title">
-      <b>Revenue Estimate</b>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Average</th>
-          <th>Low</th>
-          <th>High</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let restimate of additional_details.revenueEstimate">
-          <td>{{ restimate.date }}</td>
-          <td>{{ restimate.avg_estimate }}</td>
-          <td>{{ restimate.low_estimate }}</td>
-          <td>{{ restimate.high_estimate }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div>
-    <div class="title">
-      <b>Earnings History</b>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Year</th>
-          <th>Average</th>
-          <th>Actual</th>
-          <th>Difference</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let earnings of additional_details.earningsHistory">
-          <td>{{ earnings.date }}</td>
-          <td>{{ earnings.avg_estimate }}</td>
-          <td>{{ earnings.eps_actual }}</td>
-          <td>{{ earnings.difference }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div>
-    <div class="title">
-      <b>Options</b>&nbsp;&nbsp;&nbsp;
-
-      <label for="optionType">Calls/Puts:&nbsp;</label>
-      <select id="optionType" [(ngModel)]="selectedOptionsType" (ngModelChange)="updateOptions()">
-        <option *ngFor="let optionType of options_type" [value]="optionType">{{ optionType }}</option>
+<body>
+  <div id="choices">
+      <label for="graphType">Graph Type:&nbsp;</label>
+      <select id="graphType" [(ngModel)]="selectedGraphType" (ngModelChange)="changeChart1()">
+        <option *ngFor="let graphType of graphTypes" [value]="graphType">{{ graphType | titlecase }}</option>
       </select>
+      &nbsp;&nbsp;&nbsp; 
+      &nbsp;&nbsp;&nbsp; 
+      &nbsp;&nbsp;&nbsp; 
+      &nbsp;&nbsp;&nbsp; 
+      &nbsp;&nbsp;&nbsp; 
+      &nbsp;&nbsp;&nbsp; 
 
+      <label for="stockType">Stock:&nbsp;</label>
+      <select id="stockType" [(ngModel)]="selectedStockType" (ngModelChange)="updateBothCharts()">
+        <option *ngFor="let stockType of stockTypes" [value]="stockType">{{ stockType | uppercase }}</option>
+      </select>
+      &nbsp;&nbsp;&nbsp; 
+      &nbsp;&nbsp;&nbsp; 
+      &nbsp;&nbsp;&nbsp; 
+      &nbsp;&nbsp;&nbsp; 
+      &nbsp;&nbsp;&nbsp; 
+      &nbsp;&nbsp;&nbsp; 
+
+      <label>
+        <input type="checkbox" [(ngModel)]="showBB" (ngModelChange)="changeChart1()" [disabled]="selectedGraphType == 'candle'">
+        BB
+      </label>  
       &nbsp;&nbsp;&nbsp;
-
-      <label for="optionDate">Date:&nbsp;</label>
-      <select id="optionDate" [(ngModel)]="selectedOptionsDate" (ngModelChange)="updateOptions()">
-        <option *ngFor="let optionDate of options_dates" [value]="optionDate">{{ optionDate }}</option>
+      <label>
+        <input type="checkbox" [(ngModel)]="showSMA" (ngModelChange)="changeChart1()" [disabled]="selectedGraphType == 'candle'">
+        SMA
+      </label>    
+      &nbsp;&nbsp;&nbsp;
+      <label>
+        <input type="checkbox" [(ngModel)]="showEMA" (ngModelChange)="changeChart1()" [disabled]="selectedGraphType == 'candle'">
+        EMA
+      </label>   
+      
+      &nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp; 
+      &nbsp;&nbsp;&nbsp; 
+      &nbsp;&nbsp;&nbsp; 
+      &nbsp;&nbsp;&nbsp; 
+      &nbsp;&nbsp;&nbsp; 
+      &nbsp;&nbsp;&nbsp; 
+      
+      <label for="chart2Type">Secondary Chart:&nbsp;</label>
+      <select id="chart2Type" [(ngModel)]="selectedChart2Type" (ngModelChange)="changeChart2()">
+        <option *ngFor="let chart2Type of chart2Types" [value]="chart2Type">{{ chart2Type }}</option>
       </select>
 
-    </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Strike Price</th>
-          <th>Last Price</th>
-          <th>Bid</th>
-          <th>Ask</th>
-          <th>Change</th>
-          <th>% Change</th>
-          <th>Volume</th>
-          <th>Open Int.</th>
-          <th>Implied Vol.</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let option of options_details">
-          <td>{{ option.strike_price }}</td>
-          <td>{{ option.last_price }}</td>
-          <td>{{ option.bid }}</td>
-          <td>{{ option.ask }}</td>
-          <td>{{ option.change }}</td>
-          <td>{{ option.percent_change }}</td>
-          <td>{{ option.volume }}</td>
-          <td>{{ option.open_interest }}</td>
-          <td>{{ option.implied_volatility }}</td>
-        </tr>
-      </tbody>
-    </table>
   </div>
 
+  <div style="text-align:center">
+      <apx-chart
+        [series]="chart1Options.series"
+        [chart]="chart1Options.chart"
+        [xaxis]="chart1Options.xaxis"
+        [yaxis]="chart1Options.yaxis"
+        [title]="chart1Options.title"
+        [stroke]="chart1Options.stroke"
+        [markers]="commonOptions.markers"
+        [dataLabels]="chart1Options.dataLabels"
+        [colors]="chart1Options.colors">
+      </apx-chart>
+      <apx-chart
+        [series]="chart2Options.series"
+        [chart]="chart2Options.chart"
+        [xaxis]="chart2Options.xaxis"
+        [yaxis]="chart2Options.yaxis"
+        [title]="chart2Options.title"
+        [markers]="commonOptions.markers"
+        [dataLabels]="chart2Options.dataLabels"
+        [annotations]="chart2Options.annotations"
+        [colors]="chart2Options.colors">
+      </apx-chart>
+  </div>
 
-</div>
+  <div id="add_details">
+    <div>
+      <div class="title">
+        <b>Earnings Estimate</b>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Average</th>
+            <th>Low</th>
+            <th>High</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let eestimate of additional_details.earningsEstimate">
+            <td>{{ eestimate.date }}</td>
+            <td>{{ eestimate.avg_estimate }}</td>
+            <td>{{ eestimate.low_estimate }}</td>
+            <td>{{ eestimate.high_estimate }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <div class="title">
+        <b>Revenue Estimate</b>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Average</th>
+            <th>Low</th>
+            <th>High</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let restimate of additional_details.revenueEstimate">
+            <td>{{ restimate.date }}</td>
+            <td>{{ restimate.avg_estimate }}</td>
+            <td>{{ restimate.low_estimate }}</td>
+            <td>{{ restimate.high_estimate }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <div class="title">
+        <b>Earnings History</b>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Year</th>
+            <th>Average</th>
+            <th>Actual</th>
+            <th>Difference</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let earnings of additional_details.earningsHistory">
+            <td>{{ earnings.date }}</td>
+            <td>{{ earnings.avg_estimate }}</td>
+            <td>{{ earnings.eps_actual }}</td>
+            <td>{{ earnings.difference }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <div class="title">
+        <b>Options</b>&nbsp;&nbsp;&nbsp;
+
+        <label for="optionType">Calls/Puts:&nbsp;</label>
+        <select id="optionType" [(ngModel)]="selectedOptionsType" (ngModelChange)="updateOptions()">
+          <option *ngFor="let optionType of options_type" [value]="optionType">{{ optionType }}</option>
+        </select>
+
+        &nbsp;&nbsp;&nbsp;
+
+        <label for="optionDate">Date:&nbsp;</label>
+        <select id="optionDate" [(ngModel)]="selectedOptionsDate" (ngModelChange)="updateOptions()">
+          <option *ngFor="let optionDate of options_dates" [value]="optionDate">{{ optionDate }}</option>
+        </select>
+
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Strike Price</th>
+            <th>Last Price</th>
+            <th>Bid</th>
+            <th>Ask</th>
+            <th>Change</th>
+            <th>% Change</th>
+            <th>Volume</th>
+            <th>Open Int.</th>
+            <th>Implied Vol.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let option of options_details">
+            <td>{{ option.strike_price }}</td>
+            <td>{{ option.last_price }}</td>
+            <td>{{ option.bid }}</td>
+            <td>{{ option.ask }}</td>
+            <td>{{ option.change }}</td>
+            <td>{{ option.percent_change }}</td>
+            <td>{{ option.volume }}</td>
+            <td>{{ option.open_interest }}</td>
+            <td>{{ option.implied_volatility }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+
+  </div>
+
+</body>
