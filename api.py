@@ -3,14 +3,14 @@ import requests
 import pandas as pd
 import time
 import schedule
-from datetime import date
+from datetime import date, timedelta
 
 import yahoo_fin.options as ops
 import yahoo_fin.stock_info as sti
 # endregion
 
 # region Variables
-
+pd.set_option('display.max_columns', None)
 # medium (monthly plays) to medium/large-cap stocks
 # analyst rating
 # insider trading/purchases
@@ -62,8 +62,11 @@ def pull_daily():
         # open, high, low, close, adjusted close, volume
         # options chain
 
-        start_date = date.today.strftime("%m/%d/%y")
+        yesterday = date.today() - timedelta(days=1)
+        start_date = yesterday.strftime("%m/%d/%y")
+
         stock_data = sti.get_data(stock, start_date)
+
         print(stock_data)
 
         get_all = ops.get_options_chain(stock)
@@ -95,47 +98,10 @@ def pull_all():
         # calculate SMA, EMA, BB, RSI, %R, SO, M
 
         # store all the data to SQL
-        return
-# endregion
-
-# region Indicators
-# calculate once a day, after pull_daily
-def calculate_daily_indicators():
-    # calculate SMA, EMA, BB... RSI, %R, SO, M after daily pull
-    return
-
-
-def calculate_all_indicators():
-    # calculate SMA, EMA, BB... RSI, %R, SO, M after all data is pulled
-    return
-
-
-# region Individual Indicators
-def calculate_sma():
-    return
-
-
-def calculate_ema():
-    return
-
-
-def calculate_bb():
-    return
-
-
-def calculate_rsi():
-    return
-
-
-def calculate_percent_r():
-    return
-
-
-def calculate_so():
-    return
-
-
-def calculate_momentum():
     return
 # endregion
-# endregion
+
+
+pull_daily()
+
+pull_all()
