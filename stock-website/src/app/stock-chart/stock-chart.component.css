@@ -52,3 +52,8 @@
     justify-content: center;
     font-family: Arial, sans-serif;
 }
+
+#warning {
+    font-size: .8em;
+    margin: 0px;
+}

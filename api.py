@@ -7,6 +7,8 @@ from datetime import date, timedelta
 
 import yahoo_fin.options as ops
 import yahoo_fin.stock_info as sti
+
+import pyodbc
 # endregion
 
 # region Variables
@@ -16,45 +18,37 @@ pd.set_option('display.max_columns', None)
 # insider trading/purchases
 
 # get list of all stocks to compare
-stock_list = ["AAPL", "GOOG"]
-
-symbol = "AAPL"
+# INTC (large), CWH (small-med), GBX (small), SOFI (medium), SUZ (medium), AAL (medium)
+stock_list = ["INTC"]
+# stock_list = ["INTC", "CWH", "GBX", "SOFI", "SUZ", "AAL"]
 # endregion
 
-# api_key = "D24NAEA1UVN44M2E"
-#
-# url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={symbol}&apikey={api_key}"
-#
-# response = requests.get(url)
-#
-# if response.status_code == 200:
-#     data = response.json()
-#     print(data)
-#     print(data['Time Series (Daily)'])
-# else:
-#     print("Error occurred while retrieving stock information.")
-# pd.set_option('display.max_columns', None)
-#
-# stock_data = sti.get_data(symbol, start_date="01/01/2019")
-# print(stock_data)
+# region Set Up Database Connection
+server = 'localhost'
+database = 'Stock_Information'
+username = 'python_access'
+password = 'admin 123!'
+driver = 'ODBC Driver 17 for SQL Server'
 
-# expiration_dates = ops.get_expiration_dates("aapl")
-# print(expiration_dates)
-# 
-# get_calls = ops.get_calls("aapl")
-# print(get_calls)
-# 
-# get_calls = ops.get_puts("aapl")
-# print(get_calls)
+# conn_str = f"DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}"
 
-# get_all = ops.get_options_chain("aapl")
-# print(get_all)
-#
-# get_analyst = sti.get_analysts_info("aapl")
-# print(get_analyst)
+# conn = pyodbc.connect(conn_str)
+# cursor = conn.cursor()
+
+# cursor.execute('SELECT * FROM Stock')
+# rows = cursor.fetchall()
+
+# print("connected!")
+# for row in rows:
+#     print(row)
+
+
+# cursor.close()
+# conn.close()
+# endregion
+
 
 # pull once a day, 8pm est
-
 # region Pulling Stock Data Methods
 def pull_daily():
     for stock in stock_list:
@@ -66,8 +60,27 @@ def pull_daily():
         start_date = yesterday.strftime("%m/%d/%y")
 
         stock_data = sti.get_data(stock, start_date)
+        print("**** STOCK DATA ****")
+        # print(stock_data)
 
-        print(stock_data)
+        # retrieve stock ID from stock_ticker
+        # stock_data['stock_id'] = stock_id
+        stock_data['date'] = stock_data.index
+        stock_data = stock_data[['ticker', 'date', 'open', 'close', 'low', 'high', 'adjclose', 'volume']]
+        stock_data.columns = ['stock_id', 'date', 'open_price', 'close_price', 'low_price', 'high_price', 'adjusted_close_price', 'volume']
+
+        # round everything to 2 decimal points
+        stock_data['open_price'] = stock_data['open_price'].round(2)
+        stock_data['close_price'] = stock_data['close_price'].round(2)
+        stock_data['low_price'] = stock_data['low_price'].round(2)
+        stock_data['high_price'] = stock_data['high_price'].round(2)
+        stock_data['adjusted_close_price'] = stock_data['adjusted_close_price'].round(2)
+
+        # drop index
+        stock_data.reset_index(drop=True, inplace=True)
+
+        print(stock_data.to_string())
+        print("********************")
 
         get_all = ops.get_options_chain(stock)
         print(get_all)
@@ -78,7 +91,7 @@ def pull_daily():
     return
 
 
-# pull once every 3 months?
+# pull once a week, only update if changed?
 def pull_analyst():
     for stock in stock_list:
         get_analyst = sti.get_analysts_info(stock)
