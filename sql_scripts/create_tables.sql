@@ -36,7 +36,7 @@ CREATE TABLE Options (
     open_interest INT,
     implied_volatility DECIMAL(18, 2),
     CONSTRAINT FK_Options_Stock FOREIGN KEY (stock_id) REFERENCES Stock (stock_id),
-    CONSTRAINT PK_Options PRIMARY KEY (stock_id, date)
+    CONSTRAINT PK_Options PRIMARY KEY (stock_id, date, expiration_date, option_type)
 );
 
 
@@ -59,10 +59,27 @@ CREATE TABLE Indicators (
 CREATE TABLE AnalystData (
     stock_id INT,
     data_type VARCHAR(50),
-    current_qtr DECIMAL(18, 2),
-    next_qtr DECIMAL(18, 2),
-    current_year DECIMAL(18, 2),
-    next_year DECIMAL(18, 2),
+    current_qtr VARCHAR(10),
+    next_qtr VARCHAR(10),
+    current_year VARCHAR(10),
+    next_year VARCHAR(10),
     CONSTRAINT FK_AnalystData_Stock FOREIGN KEY (stock_id) REFERENCES Stock (stock_id),
     CONSTRAINT PK_AnalystData PRIMARY KEY (stock_id, data_type)
+);
+
+
+-- Create the earnings history table
+CREATE TABLE EarningsHistory (
+    stock_id INT,
+    data_type VARCHAR(16),
+    four_back DECIMAL(8, 2),
+	four_date DATE,
+    three_back DECIMAL(8, 2),
+	three_date DATE,
+    two_back DECIMAL(8, 2),
+	two_date DATE,
+    one_back DECIMAL(8, 2),
+	one_date DATE,
+    CONSTRAINT FK_AnalystData_Stock FOREIGN KEY (stock_id) REFERENCES Stock (stock_id),
+    CONSTRAINT PK_AnalystHistory PRIMARY KEY (stock_id)
 );
