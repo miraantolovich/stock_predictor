@@ -22,8 +22,10 @@ pd.set_option('display.max_columns', None)
 
 # get list of all stocks to compare
 # INTC (large), CWH (small-med), GBX (small), SOFI (medium), SUZ (medium), AAL (medium)
-stock_list = ["INTC"]
-# stock_list = ["INTC", "CWH", "GBX", "SOFI", "SUZ", "AAL"]
+# stock_list = ["INTC"]
+stock_list = ["INTC", "CWH", "GBX", "SOFI", "SUZ", "AAL"]
+stock_name = ["Intel Corporation", "Camping World Holdings", "The Greenbrier Companies", "SoFi Technologies",
+              "Suzano S.A.", "American Airlines Group"]
 # endregion
 
 # region Set Up Database Connection
@@ -39,7 +41,13 @@ def initialize_stocks():
     conn = pyodbc.connect(connection_string)
     cursor = conn.cursor()
 
-    cursor.execute("insert into stock(stock_id, stock_name) values ('2', 'awesome library')")
+    # for i in range(len(stock_list)):
+    #     cursor.execute(f"insert into stock(stock_name, stock_long_name) values ('{stock_list[i]}', '{stock_name[i]}')")
+
+
+    # TODO: PULL ALL THE DATA HERE
+    pull_all(cursor)
+
     cursor.commit()
 
     cursor.close()
@@ -315,7 +323,7 @@ def pull_analyst():
     # TODO: Add all to database
 
 
-def pull_all():
+def pull_all(cursor):
 
     # check if any data exists in database
 
@@ -345,40 +353,28 @@ def pull_all():
 
         # TODO: Add indicators
         # calculate SMA, EMA, BB, RSI, %R, SO, M
-        print("**** SMA ****")
         sma_200 = indicators.calculate_sma(stock_data['adjusted_close_price'], days=200)
-        print(sma_200)
-        print()
+        all_indicators = sma_200
 
-        print("**** EMA ****")
         ema_26 = indicators.calculate_ema(stock_data['adjusted_close_price'])
-        print(ema_26)
-        print()
+        all_indicators = all_indicators.join(ema_26)
 
-        print("**** BB ****")
         bb_20 = indicators.calculate_bb(stock_data['adjusted_close_price'])
-        print(bb_20)
-        print()
+        all_indicators = all_indicators.join(bb_20)
 
-        print("**** RSI ****")
         rsi_14 = indicators.calculate_rsi(stock_data['adjusted_close_price'])
-        print(rsi_14)
-        print()
+        all_indicators = all_indicators.join(rsi_14)
 
-        print("**** % R ****")
         percent_r_14 = indicators.calculate_percent_r(stock_data['adjusted_close_price'])
-        print(percent_r_14)
-        print()
+        all_indicators = all_indicators.join(percent_r_14)
 
-        print("**** SO ****")
         so_14 = indicators.calculate_so(stock_data[['high_price', 'low_price', 'adjusted_close_price']])
-        print(so_14)
-        print()
+        all_indicators = all_indicators.join(so_14)
 
-        #print("**** M ****")
-        #percent_r_14 = indicators.calculate_momentum(stock_data['adjusted_close_price'])
-        #print(percent_r_14)
-        #print()
+        percent_m_14 = indicators.calculate_momentum(stock_data['adjusted_close_price'])
+        all_indicators = all_indicators.join(percent_m_14)
+
+        print(all_indicators)
 
         # store all the data to SQL
     return
@@ -392,3 +388,5 @@ def pull_all():
 # pull_all()
 
 # pull_analyst()
+
+initialize_stocks()
