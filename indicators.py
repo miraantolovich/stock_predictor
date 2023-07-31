@@ -16,7 +16,7 @@ def calculate_all_indicators():
 # region Individual Indicators
 
 # data will be the last 200 days/50 days (good for long term)
-def calculate_sma(data, days=200):
+def calculate_sma(data, days=50):
     sma = data.rolling(window=days).mean()
     sma_dataframe = pd.DataFrame(sma)
     sma_dataframe = sma_dataframe.rename(columns={'adjusted_close_price': 'sma'})
@@ -38,8 +38,8 @@ def calculate_bb(data, window=20, std=2):
 
     std_value = data.rolling(window=window).std()
 
-    upper = middle + std * std_value
-    lower = middle - std * std_value
+    upper = middle + (std * std_value)
+    lower = middle - (std * std_value)
 
     bb_dataframe = pd.DataFrame(middle)
     bb_dataframe = bb_dataframe.rename(columns={'adjusted_close_price': 'bb_middle'})
@@ -93,23 +93,20 @@ def calculate_percent_r(data, days=14):
     highest_high = data.rolling(window=days).max()
     lowest_low = data.rolling(window=days).min()
 
-    current_close = data.iloc[-1]
-    percent_r = ((highest_high - current_close) / (highest_high - lowest_low)) * -100
+    percent_r = ((highest_high - data) / (highest_high - lowest_low)) * -100
 
     result_df = pd.DataFrame({'percent_r': percent_r})
+
     return result_df
 
 
 def calculate_so(data, days=14, smoothing=2):
-    highs = data['high_price']
-    lows = data['low_price']
-    closes = data['adjusted_close_price']
 
-    lowest_low = lows.rolling(window=days, min_periods=1).min()
-    highest_high = highs.rolling(window=days, min_periods=1).max()
+    lowest_low = data.rolling(window=days, min_periods=1).min()
+    highest_high = data.rolling(window=days, min_periods=1).max()
 
-    p_k = ((closes - lowest_low) / (highest_high - lowest_low)) * 100
-    p_d = p_k.rolling(window=smoothing).mean()
+    p_k = ((data - lowest_low) / (highest_high - lowest_low)) * 100
+    p_d = p_k.rolling(window=days).mean()
 
     so = pd.DataFrame({'p_k': p_k, 'p_d': p_d})
 
@@ -125,7 +122,7 @@ def calculate_momentum(data, days=14):
     momentum_series = pd.Series(momentum_values)
 
     for i in range(0, days):
-        momentum_series = momentum_series.append(pd.Series(np.NaN))
+        momentum_series = momentum_series.append(pd.Series(np.nan))
 
     for i in range(days, len(df)):
         prices = df.iloc[i - days: i]  # Extract 'days' number of prices
