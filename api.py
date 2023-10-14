@@ -106,7 +106,7 @@ def pull_options(current_date):
     data = {
         'stock_id': [],
         'date': [],
-        'expiration_date ': [],
+        'expiration_date': [],
         'option_type': [],
         'strike_price': [],
         'bid': [],
@@ -134,7 +134,7 @@ def pull_options(current_date):
                 calls = calls.append({
                     'stock_id': stock,
                     'date': current_date,
-                    'expiration_date ': date,
+                    'expiration_date': date,
                     'option_type': 'call',
                     'strike_price': row['Strike'],
                     'bid': row['Bid'],
@@ -153,7 +153,7 @@ def pull_options(current_date):
                 puts = calls.append({
                     'stock_id': stock,
                     'date': current_date,
-                    'expiration_date ': date,
+                    'expiration_date': date,
                     'option_type': 'puts',
                     'strike_price': row['Strike'],
                     'bid': row['Bid'],
@@ -165,8 +165,28 @@ def pull_options(current_date):
                     'implied_volatility': row['Implied Volatility']
                 }, ignore_index=True)
 
-        print(calls)
-        print(puts)
+        calls = calls.replace('-', 0)
+        calls['volume'] = pd.to_numeric(calls['volume'], errors='coerce').fillna(0).astype(int)
+        calls['expiration_date'] = pd.to_datetime(calls['expiration_date'], format='%B %d, %Y').dt.strftime('%m/%d/%y')
+
+        print(calls.to_string())
+
+        grouped = calls.groupby(calls['expiration_date'])
+
+        for date, group in grouped:
+            print("expiration_date: ", date)
+            print(group)
+            print()
+
+            index = group['volume'].idxmax()
+            print(index)
+            above_indices = index - 3
+            below_indices = index + 4
+
+            print(group.iloc[above_indices:below_indices])
+            print("**********")
+
+        # print(puts.to_string())
 
 
 # pull once a week, only update if changed?
@@ -335,13 +355,14 @@ def pull_all(cursor):
     #     return
 
     for stock in stock_list:
-        # options, analyst ratings not available for past
-
         stock_data = sti.get_data(stock, start_date="01/01/2019")
+        print(stock_data)
 
         stock_data['date'] = stock_data.index
-        stock_data = stock_data[['ticker', 'date', 'open', 'close', 'low', 'high', 'adjclose', 'volume']]
-        stock_data.columns = ['stock_id', 'date', 'open_price', 'close_price', 'low_price', 'high_price', 'adjusted_close_price', 'volume']
+        stock_data['percent_change'] = stock_data['adjclose'].pct_change() * 100
+
+        stock_data = stock_data[['ticker', 'date', 'open', 'close', 'low', 'high', 'percent_change', 'adjclose', 'volume']]
+        stock_data.columns = ['stock_id', 'date', 'open_price', 'close_price', 'low_price', 'high_price', 'percent_change', 'adjusted_close_price', 'volume']
 
         # round everything to 2 decimal points
         stock_data['open_price'] = stock_data['open_price'].round(2)
@@ -353,16 +374,18 @@ def pull_all(cursor):
         # drop index
         stock_data.reset_index(drop=True, inplace=True)
 
+        stock_data = stock_data.fillna(-3012)
+
         cursor.execute(f"select stock_id from stock where stock_name = '{stock_data['stock_id'][0]}'")
         stock_id = cursor.fetchone()
 
         stock_data['stock_id'] = stock_id[0]
 
-        # print(stock_data)
+        print(stock_data)
 
         # TODO: Add to database
-        # for i in range(len(stock_data)):
-            # cursor.execute(f"insert into price(stock_id, date, open_price, close_price, low_price, high_price, adjusted_close_price, volume) values ('{stock_data['stock_id'][i]}', '{stock_data['date'][i]}', '{stock_data['open_price'][i]}', '{stock_data['close_price'][i]}','{stock_data['low_price'][i]}', '{stock_data['high_price'][i]}', '{stock_data['adjusted_close_price'][i]}', '{stock_data['volume'][i]}')")
+        for i in range(len(stock_data)):
+            cursor.execute(f"insert into price(stock_id, date, open_price, close_price, low_price, high_price, percent_change, adjusted_close_price, volume) values ('{stock_data['stock_id'][i]}', '{stock_data['date'][i]}', '{stock_data['open_price'][i]}', '{stock_data['close_price'][i]}','{stock_data['low_price'][i]}', '{stock_data['high_price'][i]}', '{stock_data['percent_change'][i]}', '{stock_data['adjusted_close_price'][i]}', '{stock_data['volume'][i]}')")
 
         # TODO: Add indicators
         # calculate SMA, EMA, BB, RSI, %R, SO, M
@@ -384,21 +407,21 @@ def pull_all(cursor):
         percent_r_14 = indicators.calculate_percent_r(stock_data['adjusted_close_price'])
         all_indicators = all_indicators.join(percent_r_14)
 
-        so_14 = indicators.calculate_so(stock_data[['high_price', 'low_price', 'adjusted_close_price']])
+        so_14 = indicators.calculate_so(stock_data['adjusted_close_price'])
         all_indicators = all_indicators.join(so_14)
 
-        percent_m_14 = indicators.calculate_momentum(stock_data['adjusted_close_price'])
+        percent_m_14 = indicators.calculate_roc(stock_data['adjusted_close_price'])
         all_indicators = all_indicators.join(percent_m_14)
 
 
-        print(all_indicators)
         all_indicators = all_indicators.fillna(-3012)
         print(all_indicators)
 
         for i in range(len(all_indicators)):
-            cursor.execute(f"insert into indicators(stock_id, date, sma, ema, bb_middle, bb_lower, bb_upper, momentum, r_percent, si_k, si_d, rsi) values ('{all_indicators['stock_id'][i]}', '{all_indicators['date'][i]}', '{all_indicators['sma'][i]}', '{all_indicators['ema'][i]}','{all_indicators['bb_middle'][i]}', '{all_indicators['bb_lower'][i]}', '{all_indicators['bb_upper'][i]}', '{all_indicators['momentum'][i]}', '{all_indicators['percent_r'][i]}', '{all_indicators['p_k'][i]}', '{all_indicators['p_d'][i]}', '{all_indicators['rsi'][i]}')")
+            cursor.execute(f"insert into indicators(stock_id, date, sma, ema, bb_middle, bb_lower, bb_upper, roc, r_percent, si_k, si_d, rsi) values ('{all_indicators['stock_id'][i]}', '{all_indicators['date'][i]}', '{all_indicators['sma'][i]}', '{all_indicators['ema'][i]}','{all_indicators['bb_middle'][i]}', '{all_indicators['bb_lower'][i]}', '{all_indicators['bb_upper'][i]}', '{all_indicators['roc'][i]}', '{all_indicators['percent_r'][i]}', '{all_indicators['p_k'][i]}', '{all_indicators['p_d'][i]}', '{all_indicators['rsi'][i]}')")
 
-        # store all the data to SQL
+        # options, analyst ratings not available for past, pull most recent
+
     return
 # endregion
 
@@ -441,20 +464,24 @@ def do_indicators():
     so_14 = indicators.calculate_so(stock_data['adjusted_close_price'])
     all_indicators = all_indicators.join(so_14)
 
-    percent_m_14 = indicators.calculate_momentum(stock_data['adjusted_close_price'])
-    all_indicators = all_indicators.join(percent_m_14)
+    percent_roc_14 = indicators.calculate_roc(stock_data['adjusted_close_price'])
+    all_indicators = all_indicators.join(percent_roc_14)
 
     print(all_indicators.to_string())
 
 
+today = dt.date.today()
+start_date = today.strftime("%m/%d/%y")
+
 # pull_daily()
 
-# pull_options()
+pull_options(start_date)
 
 # pull_all()
 
 # pull_analyst()
 
+# do_indicators()
+
 # initialize_stocks()
 
-do_indicators()

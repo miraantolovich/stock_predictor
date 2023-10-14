@@ -58,6 +58,7 @@ export class StockChartComponent {
   protected x_axis_data = ["Jan", "Feb",  "Mar",  "Apr",  "May",  "Jun",  "Jul",  "Aug", "Sep"]
   
   protected advanced_data = [10000, 41000, 35000, 51000, 49000, 62000, 69000, 91000, 148000];
+  protected roc_data = [1, 2, 3, 0, -3, -2, -4, 1, 0]
   
   protected additional_details = {    
     earningsEstimate: [
@@ -168,7 +169,7 @@ export class StockChartComponent {
   ]
 
   // chart 2 should be drop down I think
-  protected chart2Types = ["Volume", "RSI", "%R", "SO", "M"];
+  protected chart2Types = ["Volume", "RSI", "%R", "SO", "ROC"];
   protected selectedChart2Type = this.chart2Types[0];
 
   protected showSMA = false;
@@ -658,12 +659,12 @@ export class StockChartComponent {
       }
     }
 
-    else if (this.selectedChart2Type == "Momentum") {
+    else if (this.selectedChart2Type == "ROC") {
       this.chart2Options = {
         series: [
           {
-            name: "Momentum",
-            data: this.advanced_data,
+            name: "ROC",
+            data: this.roc_data,
           }
         ],
         chart: {
@@ -691,7 +692,24 @@ export class StockChartComponent {
         stroke: {
           curve: "straight",
           width: [4, 4, 4, 4, 4, 4],
+        },
+        annotations: {
+          yaxis: [
+          {
+            y: 0,
+            borderColor: "black",
+            strokeDashArray: 0,
+            borderWidth: 2,
+            label: {
+              text: "Movement",
+              style: {
+                color: "#fff",
+                background: "black"
+              }
+            }
+          }]
         }
+
       };  
     }
 

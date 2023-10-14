@@ -108,6 +108,8 @@ def calculate_so(data, days=14, smoothing=2):
     p_k = ((data - lowest_low) / (highest_high - lowest_low)) * 100
     p_d = p_k.rolling(window=days).mean()
 
+    print(p_k)
+    print(p_d)
     so = pd.DataFrame({'p_k': p_k, 'p_d': p_d})
 
     so['p_k'].iloc[:days] = np.nan
@@ -116,23 +118,22 @@ def calculate_so(data, days=14, smoothing=2):
     return so
 
 
-def calculate_momentum(data, days=14):
-    momentum_values = []
+def calculate_roc(data, days=14):
+    roc_values = []
     df = pd.DataFrame(data)  # Convert the data to a DataFrame
-    momentum_series = pd.Series(momentum_values)
+    roc_series = pd.Series(roc_values)
 
     for i in range(0, days):
-        momentum_series = momentum_series.append(pd.Series(np.nan))
+        roc_series = roc_series.append(pd.Series(np.nan))
 
     for i in range(days, len(df)):
         prices = df.iloc[i - days: i]  # Extract 'days' number of prices
-        momentum = prices.iloc[-1] - prices.iloc[0]  # Calculate the difference between the current price and the price 'days' ago
-        momentum_series = momentum_series.append(pd.Series(momentum))
+        roc = prices.iloc[-1] - prices.iloc[0]  # Calculate the difference between the current price and the price 'days' ago
+        roc_series = roc_series.append(pd.Series(roc))
 
-    momentum_series.index = np.arange(len(momentum_series))  # Reset the index
-    momentum_df = pd.DataFrame(momentum_series, columns=['momentum'])  # Convert momentum_series to DataFrame
+    roc_series.index = np.arange(len(roc_series))  # Reset the index
+    roc_df = pd.DataFrame(roc_series, columns=['roc'])  # Convert roc_series to DataFrame
 
-    return momentum_df
+    return roc_df
 
-# endregion
 # endregion
