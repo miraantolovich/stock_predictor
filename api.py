@@ -1,4 +1,6 @@
 # region Imports
+import datetime
+
 import requests
 import pandas as pd
 import numpy as np
@@ -25,9 +27,9 @@ pd.set_option('display.max_columns', None)
 # get list of all stocks to compare
 # INTC (large), CWH (small-med), GBX (small), SOFI (medium), SUZ (medium), AAL (medium)
 stock_list = ["INTC"]
-# stock_list = ["INTC", "CWH", "GBX", "SOFI", "SUZ", "AAL", "^GSPC", "^TNX"]
+# stock_list = ["INTC", "CWH", "GBX", "SOFI", "SUZ", "AAL"]
 stock_name = ["Intel Corporation", "Camping World Holdings", "The Greenbrier Companies", "SoFi Technologies",
-              "Suzano S.A.", "American Airlines Group", "S&P 500", "Treasury Yield 10 Years"]
+              "Suzano S.A.", "American Airlines Group"]
 # endregion
 
 # region Set Up Database Connection
@@ -429,18 +431,46 @@ def pull_analyst():
 
 # pull once a day, 8pm est
 # region Pulling Stock Data Methods
-def pull_daily(cursor):
+def pull_daily():
+    connection_string = f"DRIVER={{{driver}}};SERVER={server};DATABASE={database};Trusted_Connection=yes"
+
+    conn = pyodbc.connect(connection_string)
+    cursor = conn.cursor()
+
     for stock in stock_list:
         # pull stock data:
         # open, high, low, close, adjusted close, volume
         # options chain
-
         today = dt.date.today()
-        start_date = today.strftime("%m/%d/%y")
+        start_date = today.strftime('%Y-%m-%d')
+        print(start_date)
 
-        stock_data = sti.get_data(stock, start_date)
+        if (today.weekday() == 5 or today.weekday() == 6):
+            print("Skip weekends.")
+            cursor.commit()
+
+            cursor.close()
+            conn.close()
+            return
+
+        stock_data = sti.get_data(stock, start_date=start_date)
         print("**** STOCK DATA ****")
-        # print(stock_data)
+        print(stock_data)
+
+        counter = 0
+        while (start_date != stock_data.index[0]):
+            print("Nope. Try again.")
+            counter += 1
+            time.sleep(600)
+            stock_data = sti.get_data(stock, start_date=start_date)
+
+            if (counter >= 20):
+                print("Was unable to pull data today.")
+                cursor.commit()
+
+                cursor.close()
+                conn.close()
+                return
 
         # retrieve stock ID from stock_ticker
         # stock_data['stock_id'] = stock_id
@@ -479,61 +509,76 @@ def pull_daily(cursor):
 
         stock_data['percent_change'] = p_change
 
+        print(stock_data)
+
         df = df.append(stock_data)
         df['adjusted_close_price'] = df['adjusted_close_price'].astype(float)
         df = df.reset_index(drop=True)
-        print(df)
-        print("-----------")
-        print(df['adjusted_close_price'])
-        print("-----------")
+        # print(df)
+        # print("-----------")
+        # print(df['adjusted_close_price'])
+        # print("-----------")
 
         # TODO: Do indicators here
         indicators_final = [stock_id[0], start_date]
         sma_50 = indicators.calculate_sma(df['adjusted_close_price'], days=50)
-        print("SMA 50")
-        print(sma_50.iloc[50])
-        indicators_final.append(sma_50.iloc[50])
+        # print("SMA 50")
+        # print(sma_50['sma'].values[50])
+        indicators_final.append(round(sma_50['sma'].values[50], 2))
 
         ema_26 = indicators.calculate_ema(df['adjusted_close_price'])
-        print("EMA 26")
-        print(ema_26.iloc[50])
-        indicators_final.append(ema_26.iloc[50])
+        # print("EMA 26")
+        # print(ema_26['ema'].values[50])
+        indicators_final.append(round(ema_26['ema'].values[50], 2))
 
         bb_20 = indicators.calculate_bb(df['adjusted_close_price'])
-        print("BB 20")
-        print(bb_20.iloc[50])
-        indicators_final.append(bb_20.iloc[50]["bb_middle"])
-        indicators_final.append(bb_20.iloc[50]["bb_lower"])
-        indicators_final.append(bb_20.iloc[50]["bb_upper"])
+        # print("BB 20")
+        # print(bb_20.values[50])
+        indicators_final.append(round(bb_20["bb_middle"].values[50], 2))
+        indicators_final.append(round(bb_20["bb_lower"].values[50], 2))
+        indicators_final.append(round(bb_20["bb_upper"].values[50], 2))
 
         rsi_14 = indicators.calculate_rsi(df['adjusted_close_price'])
-        print("RSI 14")
-        print(rsi_14.iloc[50])
-        indicators_final.append(rsi_14.iloc[50])
+        # print("RSI 14")
+        # print(rsi_14["rsi"].values[50])
+        indicators_final.append(round(rsi_14["rsi"].values[50], 2))
 
         percent_r_14 = indicators.calculate_percent_r(df['adjusted_close_price'])
-        print("R 14")
-        print(percent_r_14.iloc[50])
-        indicators_final.append(percent_r_14.iloc[50])
+        # print("R 14")
+        # print(percent_r_14["percent_r"].values[50])
+        indicators_final.append(round(percent_r_14["percent_r"].values[50], 2))
 
         so_14 = indicators.calculate_so(df['adjusted_close_price'])
-        print("SO 14")
-        indicators_final.append(so_14.iloc[50]["p_k"])
-        indicators_final.append(so_14.iloc[50]["p_d"])
+        # print("SO 14")
+        # print(so_14["p_k"].values[50])
+        # print(so_14["p_d"].values[50])
+        indicators_final.append(round(so_14["p_k"].values[50], 2))
+        indicators_final.append(round(so_14["p_d"].values[50], 2))
 
         percent_m_14 = indicators.calculate_roc(df['adjusted_close_price'])
-        print("%M 14")
-        print(percent_m_14.iloc[50])
-        indicators_final.append(percent_m_14.iloc[50])
+        # print("%M 14")
+        # print(percent_m_14["roc"].values[50])
+        indicators_final.append(round(percent_m_14["roc"].values[50], 2))
 
         print(indicators_final)
 
+        cursor.execute(f"insert into price(stock_id, date, open_price, close_price, low_price, high_price, percent_change, adjusted_close_price, volume) values ('{stock_data['stock_id'].values[0]}', '{stock_data['date'].values[0]}', '{stock_data['open_price'].values[0]}', '{stock_data['close_price'].values[0]}','{stock_data['low_price'].values[0]}', '{stock_data['high_price'].values[0]}', '{stock_data['percent_change'].values[0]}', '{stock_data['adjusted_close_price'].values[0]}', '{stock_data['volume'].values[0]}')")
+
+        # cursor.execute(f"insert into indicators(stock_id, date, sma, ema, bb_middle, bb_lower, bb_upper, roc, r_percent, si_k, si_d, rsi) values ('{indicators_final[0]}', '{indicators_final[1]}', '{indicators_final[2]}', '{indicators_final[3]}','{indicators_final[4]}', '{indicators_final[5]}', '{indicators_final[6]}', '{indicators_final[11]}', '{indicators_final[8]}', '{indicators_final[9]}', '{indicators_final[10]}', '{indicators_final[7]}')")
+
         # TODO: Add options here later.
-        # pull_options(yesterday)
+        pull_options(start_date)
+
+        pull_analyst(start_date)
 
 
     # put all into database
     print("Daily pull done")
+    cursor.commit()
+
+    cursor.close()
+    conn.close()
+
     return
 
 
@@ -543,9 +588,9 @@ def pull_all(cursor):
     cursor.execute(f"select top 1 * from Stock")
     any_data = cursor.fetchone()
 
-    # if (any_data):
-    #     print(any_data)
-    #     return
+    if (any_data):
+        print(any_data)
+        return
 
     for stock in stock_list:
         # PRICE DATABASE
@@ -709,18 +754,26 @@ def do_indicators():
 
 # initialize_stocks()
 
-connection_string = f"DRIVER={{{driver}}};SERVER={server};DATABASE={database};Trusted_Connection=yes"
-print(connection_string)
+if __name__ == "__main__":
+    connection_string = f"DRIVER={{{driver}}};SERVER={server};DATABASE={database};Trusted_Connection=yes"
 
-conn = pyodbc.connect(connection_string)
-cursor = conn.cursor()
+    conn = pyodbc.connect(connection_string)
+    cursor = conn.cursor()
 
-pull_daily(cursor)
+    pull_all(cursor)
 
-cursor.commit()
+    cursor.commit()
 
-cursor.close()
-conn.close()
+    cursor.close()
+    conn.close()
+
+    schedule.every().day.at("22:00").do(pull_daily)
+
+    while True:
+        schedule.run_pending()
+        time.sleep(600)
+
+
 
 
 

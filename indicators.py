@@ -108,8 +108,8 @@ def calculate_so(data, days=14, smoothing=2):
     p_k = ((data - lowest_low) / (highest_high - lowest_low)) * 100
     p_d = p_k.rolling(window=days).mean()
 
-    print(p_k)
-    print(p_d)
+    # print(p_k)
+    # print(p_d)
     so = pd.DataFrame({'p_k': p_k, 'p_d': p_d})
 
     so['p_k'].iloc[:days] = np.nan
