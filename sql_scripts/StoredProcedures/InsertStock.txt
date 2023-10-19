@@ -1,0 +1,28 @@
+USE [Stock_Information]
+GO
+/** Object:  StoredProcedure [dbo].[InsertIndicators]    Script Date: 10/14/2023 1:34:36 PM **/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+ALTER PROCEDURE [dbo].[InsertStock]
+        @param_stock_name VARCHAR(16),
+        @param_stock_long_name VARCHAR(255)
+AS
+BEGIN
+    -- SET NOCOUNT ON added to prevent extra result sets from
+    -- interfering with SELECT statements.
+    SET NOCOUNT ON;
+
+	DECLARE @stock_name AS VARCHAR(16);
+    DECLARE @stock_long_name AS VARCHAR(255);
+
+	SET @stock_name = @param_stock_name;
+    SET @stock_long_name = @param_stock_long_name;
+
+    -- Insert statements for procedure here
+    INSERT INTO dbo.Stock( stock_name, stock_long_name ) VALUES ( @stock_name, @stock_long_name ); 
+
+END

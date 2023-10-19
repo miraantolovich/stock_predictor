@@ -1,0 +1,59 @@
+USE [Stock_Information]
+GO
+/** Object:  StoredProcedure [dbo].[InsertIndicators]    Script Date: 10/14/2023 1:34:36 PM **/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+ALTER PROCEDURE [dbo].[InsertIndicators]
+        @param_stock_id AS VARCHAR(16),
+        @param_date AS VARCHAR(64),
+		@param_sma AS VARCHAR(16),
+		@param_ema AS VARCHAR(16),
+		@param_bb_middle AS VARCHAR(16),
+		@param_bb_lower AS VARCHAR(16),
+		@param_bb_upper AS VARCHAR(16),
+		@param_roc AS VARCHAR(16),
+		@param_r_percent AS VARCHAR(16),
+		@param_si_k AS VARCHAR(16),
+		@param_si_d AS VARCHAR(16),
+		@param_rsi AS VARCHAR(16)
+AS
+BEGIN
+    -- SET NOCOUNT ON added to prevent extra result sets from
+    -- interfering with SELECT statements.
+    SET NOCOUNT ON;
+
+	DECLARE @stock_id AS INT;
+    DECLARE @date AS DATE;
+	DECLARE @sma AS DECIMAL(18, 2);
+	DECLARE @ema AS DECIMAL(18, 2);
+	DECLARE @bb_middle AS DECIMAL(18, 2);
+    DECLARE @bb_lower AS DECIMAL(18, 2);
+    DECLARE @bb_upper AS DECIMAL(18, 2);
+    DECLARE @roc AS DECIMAL(18, 2);
+    DECLARE @r_percent AS DECIMAL(18, 2);
+	DECLARE @si_k AS DECIMAL(18, 2);
+	DECLARE @si_d AS DECIMAL(18, 2);
+	DECLARE @rsi AS DECIMAL(18, 2);
+
+	SET @stock_id = TRY_CAST(REPLACE( @param_stock_id, ',', '') AS INT)
+	SET @date = TRY_CAST(REPLACE( @param_date, ',', '') AS DATE)
+	SET @sma = TRY_CAST(REPLACE( @param_sma, ',', '') AS DECIMAL(18, 2))
+	SET @ema = TRY_CAST(REPLACE( @param_ema, ',', '') AS DECIMAL(18, 2))
+	SET @bb_middle = TRY_CAST(REPLACE( @param_bb_middle, ',', '') AS DECIMAL(18, 2))
+	SET @bb_lower = TRY_CAST(REPLACE( @param_bb_lower, ',', '') AS DECIMAL(18, 2))
+	SET @bb_upper = TRY_CAST(REPLACE( @param_bb_upper, ',', '') AS DECIMAL(18, 2))
+	SET @roc = TRY_CAST(REPLACE( @param_roc, ',', '') AS DECIMAL(18, 2))
+	SET @r_percent = TRY_CAST(REPLACE( @param_r_percent, ',', '') AS DECIMAL(18, 2))
+	SET @si_k = TRY_CAST(REPLACE( @param_si_k, ',', '') AS DECIMAL(18, 2))
+	SET @si_d = TRY_CAST(REPLACE( @param_si_d, ',', '') AS DECIMAL(18, 2))
+	SET @rsi = TRY_CAST(REPLACE( @param_rsi, ',', '') AS DECIMAL(18, 2))
+
+    -- Insert statements for procedure here
+    INSERT INTO dbo.Indicators( stock_id, date, sma, ema, bb_middle, bb_lower, bb_upper, roc, r_percent, si_k, si_d, rsi ) 
+	VALUES ( @stock_id, @date, @sma, @ema, @bb_middle, @bb_lower, @bb_upper, @roc, @r_percent, @si_k, @si_d, @rsi ); 
+
+END
