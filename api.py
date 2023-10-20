@@ -43,6 +43,9 @@ sql_insert_stock = "EXEC [Stock_Information].[dbo].[InsertStock] ?, ?"
 sql_insert_price = "EXEC [Stock_Information].[dbo].[InsertPrice] ?, ?, ?, ?, ?, ?, ?, ?, ?"
 sql_insert_indicators = "EXEC [Stock_Information].[dbo].[InsertIndicators] ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
 sql_insert_options = "EXEC [Stock_Information].[dbo].[InsertOptions] ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
+sql_insert_options = "EXEC [Stock_Information].[dbo].[InsertEarningsEstimate] ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
+sql_insert_options = "EXEC [Stock_Information].[dbo].[InsertEarningsHistory] ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
+sql_insert_options = "EXEC [Stock_Information].[dbo].[InsertRevenueEstimate] ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
 # endregion
 
 def initialize_stocks():
@@ -615,6 +618,7 @@ def pull_daily():
         earnings_history['stock_id'] = stock_id[0]
 
         for i in range(len(earnings_estimate)):
+            params = (earnings_estimate['stock_id'][i], earnings_estimate['data_type'][i], earnings_estimate['current_qtr'][i], earnings_estimate['current_qtr_name'][i], earnings_estimate['next_qtr'][i], earnings_estimate['next_qtr_name'][i], earnings_estimate['current_year'][i], earnings_estimate['current_year_name'][i], earnings_estimate['next_year'][i], earnings_estimate['next_year_name'][i])
             cursor.execute(
                 f"insert into earningsestimate(stock_id, data_type, current_qtr, current_qtr_name, next_qtr, next_qtr_name, current_year, current_year_name, next_year, next_year_name) values ('{earnings_estimate['stock_id'][i]}', '{earnings_estimate['data_type'][i]}', '{earnings_estimate['current_qtr'][i]}', '{earnings_estimate['current_qtr_name'][i]}','{earnings_estimate['next_qtr'][i]}', '{earnings_estimate['next_qtr_name'][i]}', '{earnings_estimate['current_year'][i]}', '{earnings_estimate['current_year_name'][i]}', '{earnings_estimate['next_year'][i]}', '{earnings_estimate['next_year_name'][i]}')")
 

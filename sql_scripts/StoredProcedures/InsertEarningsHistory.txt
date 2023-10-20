@@ -1,0 +1,42 @@
+USE [Stock_Information]
+GO
+/** Object:  StoredProcedure [dbo].[InsertIndicators]    Script Date: 10/14/2023 1:34:36 PM **/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+ALTER PROCEDURE [dbo].[InsertEarningsHistory]
+        @param_stock_id AS VARCHAR(16),
+        @param_data_type AS VARCHAR(16),
+		@param_four_back VARCHAR(10),
+		@param_four_date AS VARCHAR(32),
+		@param_three_back AS VARCHAR(10),
+		@param_three_date AS VARCHAR(32),
+		@param_two_back AS VARCHAR(10),
+		@param_two_date AS VARCHAR(32),
+		@param_one_back AS VARCHAR(10),
+		@param_one_date AS VARCHAR(32)
+AS
+BEGIN
+    -- SET NOCOUNT ON added to prevent extra result sets from
+    -- interfering with SELECT statements.
+    SET NOCOUNT ON;
+
+	DECLARE @stock_id AS INT;
+    DECLARE @data_type AS VARCHAR(16);
+	DECLARE @four_back AS DECIMAL(8, 2);
+	DECLARE @four_date AS DATE;
+	DECLARE @three_back AS DECIMAL(8, 2);
+    DECLARE @three_date AS DATE;
+    DECLARE @two_back AS DECIMAL(8, 2);
+    DECLARE @two_date AS DATE;
+    DECLARE @one_back AS DECIMAL(8, 2);
+	DECLARE @one_date AS DATE;
+
+    -- Insert statements for procedure here
+    INSERT INTO dbo.EarningsHistory( stock_id, data_type, four_back, four_date, three_back, three_date, two_back, two_date, one_back, one_date ) 
+	VALUES ( @stock_id, @data_type, @four_back, @four_date, @three_back, @three_date, @two_back, @two_date, @one_back, @one_date ); 
+
+END
