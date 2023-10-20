@@ -35,8 +35,43 @@ BEGIN
     DECLARE @next_year AS VARCHAR(10);
 	DECLARE @next_year_name AS VARCHAR(32);
 
-    -- Insert statements for procedure here
-    INSERT INTO dbo.RevenueEstimate( stock_id, data_type, current_qtr, current_qtr_name, next_qtr, next_qtr_name, current_year, current_year_name, next_year, next_year_name ) 
-	VALUES ( @stock_id, @data_type, @current_qtr, @current_qtr_name, @next_qtr, @next_qtr_name, @current_year, @current_year_name, @next_year, @next_year_name ); 
+	SET @stock_id = TRY_CAST(REPLACE( @param_stock_id, ',', '') AS INT)
+	SET @data_type = @param_data_type
+	SET @current_qtr = @param_current_qtr
+	SET @current_qtr_name = @param_current_qtr_name
+	SET @next_qtr = @param_next_qtr
+	SET @next_qtr_name = @param_next_qtr_name
+	SET @current_year = @param_current_year
+	SET @current_year_name = @param_current_year_name
+	SET @next_year = @param_next_year
+	SET @next_year_name = @param_next_year_name
+
+	-- Insert statements for procedure here
+	IF EXISTS (
+        SELECT 1
+        FROM dbo.RevenueEstimate
+        WHERE stock_id = @stock_id
+    )
+    BEGIN
+        -- If there are existing records for the stock_id, update those records
+        UPDATE dbo.RevenueEstimate
+        SET current_qtr = @current_qtr,
+			current_qtr_name = @current_qtr_name,
+			next_qtr = @next_qtr,
+			next_qtr_name = @next_qtr_name,
+            current_year = @current_year,
+			current_year_name = @current_year_name,
+			next_year = @next_year,
+            next_year_name = @next_qtr_name
+        WHERE stock_id = @stock_id
+			AND data_type = @data_type
+			AND current_qtr_name <> @current_qtr_name;
+    END
+    ELSE
+    BEGIN
+        -- If there are no matching records for the stock_id, insert the new record
+		INSERT INTO dbo.RevenueEstimate( stock_id, data_type, current_qtr, current_qtr_name, next_qtr, next_qtr_name, current_year, current_year_name, next_year, next_year_name ) 
+		VALUES ( @stock_id, @data_type, @current_qtr, @current_qtr_name, @next_qtr, @next_qtr_name, @current_year, @current_year_name, @next_year, @next_year_name ); 
+    END
 
 END

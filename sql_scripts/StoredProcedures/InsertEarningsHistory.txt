@@ -35,8 +35,43 @@ BEGIN
     DECLARE @one_back AS DECIMAL(8, 2);
 	DECLARE @one_date AS DATE;
 
-    -- Insert statements for procedure here
-    INSERT INTO dbo.EarningsHistory( stock_id, data_type, four_back, four_date, three_back, three_date, two_back, two_date, one_back, one_date ) 
-	VALUES ( @stock_id, @data_type, @four_back, @four_date, @three_back, @three_date, @two_back, @two_date, @one_back, @one_date ); 
+	SET @stock_id = TRY_CAST(REPLACE( @param_stock_id, ',', '') AS INT)
+	SET @data_type = @param_data_type 
+	SET @four_back = TRY_CAST(REPLACE( @param_four_back, ',', '') AS DECIMAL(8, 2))
+	SET @four_date = TRY_CAST(REPLACE( @param_four_date, ',', '') AS DATE)
+	SET @three_back = TRY_CAST(REPLACE( @param_three_back, ',', '') AS DECIMAL(8, 2))
+	SET @three_date = TRY_CAST(REPLACE( @param_three_date, ',', '') AS DATE)
+	SET @two_back = TRY_CAST(REPLACE( @param_two_back, ',', '') AS DECIMAL(8, 2))
+	SET @two_date = TRY_CAST(REPLACE( @param_two_date, ',', '') AS DATE)
+	SET @one_back = TRY_CAST(REPLACE( @param_one_back, ',', '') AS DECIMAL(8, 2))
+	SET @one_date = TRY_CAST(REPLACE( @param_one_date, ',', '') AS DATE)
+
+
+	IF EXISTS (
+        SELECT 1
+        FROM dbo.EarningsHistory
+        WHERE stock_id = @stock_id
+    )
+    BEGIN
+        -- If there are existing records for the stock_id, update those records
+        UPDATE dbo.EarningsHistory
+        SET four_back = @four_back,
+			four_date = @four_date,
+            three_back = @three_back,
+            three_date = @three_date,
+            two_back = @two_back,
+            two_date = @two_date,
+            one_back = @one_back,
+			one_date = @one_date
+        WHERE stock_id = @stock_id
+			AND data_type = @data_type
+			AND four_date <> @four_date;
+    END
+    ELSE
+    BEGIN
+        -- If there are no matching records for the stock_id, insert the new record
+		INSERT INTO dbo.EarningsHistory( stock_id, data_type, four_back, four_date, three_back, three_date, two_back, two_date, one_back, one_date ) 
+		VALUES ( @stock_id, @data_type, @four_back, @four_date, @three_back, @three_date, @two_back, @two_date, @one_back, @one_date ); 
+    END
 
 END
