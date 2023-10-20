@@ -51,6 +51,7 @@ BEGIN
         SELECT 1
         FROM dbo.EarningsEstimate
         WHERE stock_id = @stock_id
+		AND data_type = @data_type
     )
     BEGIN
         -- If there are existing records for the stock_id, update those records

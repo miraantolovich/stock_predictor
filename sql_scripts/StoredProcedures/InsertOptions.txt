@@ -8,8 +8,8 @@ GO
 
 
 ALTER PROCEDURE [dbo].[InsertOptions]
-        @param_stock_id AS VARCHAR(16),
-        @param_date AS VARCHAR(64),
+    @param_stock_id AS VARCHAR(16),
+    @param_date AS VARCHAR(64),
 	@param_expiration_date AS VARCHAR(64),
 	@param_option_type AS VARCHAR(10),
 	@param_strike_price AS VARCHAR(10),
@@ -30,7 +30,8 @@ BEGIN
 	DECLARE @stock_id AS INT;
     DECLARE @date AS DATE;
 	DECLARE @expiration_date AS DATE;
-	DECLARE @strike_price AS DECIMAL(18, 2);
+	DECLARE @option_type AS VARCHAR(10);
+	DECLARE @strike_price AS VARCHAR(10);
 	DECLARE @bid AS VARCHAR(10);
     DECLARE @ask AS VARCHAR(10)
     DECLARE @change AS VARCHAR(10);
@@ -39,9 +40,21 @@ BEGIN
 	DECLARE @open_interest AS VARCHAR(10);
 	DECLARE @implied_volatility AS VARCHAR(10);
 
+	SET @stock_id = TRY_CAST(REPLACE( @param_stock_id, ',', '') AS INT)
+	SET @date = TRY_CAST(REPLACE( @param_date, ',', '') AS DATE)
+	SET @expiration_date = TRY_CAST(REPLACE( @param_expiration_date, ',', '') AS DATE)
+	SET @option_type = @param_option_type
+	SET @strike_price = @param_strike_price
+	SET @bid = @param_bid
+	SET @ask = @param_ask
+	SET @change = @param_change
+	SET @percent_change = @param_percent_change
+	SET @volume = @param_volume
+	SET @open_interest = @param_open_interest
+	SET @implied_volatility = @param_implied_volatility
 
     -- Insert statements for procedure here
-    INSERT INTO dbo.Options( stock_id, date, expiration_date, strike_price, bid, ask, change, percent_change, volume, open_interest, implied_volatility ) 
-	VALUES ( @stock_id, @date, @expiration_date, @strike_price, @bid, @ask, @change, @percent_change, @volume, @open_interest, @implied_volatility ); 
+    INSERT INTO dbo.Options( stock_id, date, expiration_date, option_type, strike_price, bid, ask, change, percent_change, volume, open_interest, implied_volatility ) 
+	VALUES ( @stock_id, @date, @expiration_date, @option_type, @strike_price, @bid, @ask, @change, @percent_change, @volume, @open_interest, @implied_volatility ); 
 
 END

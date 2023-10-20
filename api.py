@@ -43,9 +43,9 @@ sql_insert_stock = "EXEC [Stock_Information].[dbo].[InsertStock] ?, ?"
 sql_insert_price = "EXEC [Stock_Information].[dbo].[InsertPrice] ?, ?, ?, ?, ?, ?, ?, ?, ?"
 sql_insert_indicators = "EXEC [Stock_Information].[dbo].[InsertIndicators] ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
 sql_insert_options = "EXEC [Stock_Information].[dbo].[InsertOptions] ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
-sql_insert_options = "EXEC [Stock_Information].[dbo].[InsertEarningsEstimate] ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
-sql_insert_options = "EXEC [Stock_Information].[dbo].[InsertEarningsHistory] ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
-sql_insert_options = "EXEC [Stock_Information].[dbo].[InsertRevenueEstimate] ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
+sql_insert_earnings_estimate = "EXEC [Stock_Information].[dbo].[InsertEarningsEstimate] ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
+sql_insert_earnings_history = "EXEC [Stock_Information].[dbo].[InsertEarningsHistory] ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
+sql_insert_revenue_estimate = "EXEC [Stock_Information].[dbo].[InsertRevenueEstimate] ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
 # endregion
 
 def initialize_stocks():
@@ -130,8 +130,8 @@ def pull_options(current_date):
                     'implied_volatility': row['Implied Volatility']
                 }, ignore_index=True)
 
-        calls = calls.replace('-', 0)
-        calls['volume'] = pd.to_numeric(calls['volume'], errors='coerce').fillna(0).astype(int)
+        calls = calls.replace('-', '0.00%')
+        calls['volume'] = pd.to_numeric(calls['volume'], errors='coerce').fillna(0)
         calls['expiration_date'] = pd.to_datetime(calls['expiration_date'], format='%B %d, %Y').dt.strftime('%m/%d/%y')
 
         # print(calls.to_string())
@@ -619,17 +619,15 @@ def pull_daily():
 
         for i in range(len(earnings_estimate)):
             params = (earnings_estimate['stock_id'][i], earnings_estimate['data_type'][i], earnings_estimate['current_qtr'][i], earnings_estimate['current_qtr_name'][i], earnings_estimate['next_qtr'][i], earnings_estimate['next_qtr_name'][i], earnings_estimate['current_year'][i], earnings_estimate['current_year_name'][i], earnings_estimate['next_year'][i], earnings_estimate['next_year_name'][i])
-            cursor.execute(
-                f"insert into earningsestimate(stock_id, data_type, current_qtr, current_qtr_name, next_qtr, next_qtr_name, current_year, current_year_name, next_year, next_year_name) values ('{earnings_estimate['stock_id'][i]}', '{earnings_estimate['data_type'][i]}', '{earnings_estimate['current_qtr'][i]}', '{earnings_estimate['current_qtr_name'][i]}','{earnings_estimate['next_qtr'][i]}', '{earnings_estimate['next_qtr_name'][i]}', '{earnings_estimate['current_year'][i]}', '{earnings_estimate['current_year_name'][i]}', '{earnings_estimate['next_year'][i]}', '{earnings_estimate['next_year_name'][i]}')")
+            cursor.execute(sql_insert_earnings_estimate, params)
 
         for i in range(len(revenue_estimate)):
-            cursor.execute(
-                f"insert into revenueestimate(stock_id, data_type, current_qtr, current_qtr_name, next_qtr, next_qtr_name, current_year, current_year_name, next_year, next_year_name) values ('{revenue_estimate['stock_id'][i]}', '{revenue_estimate['data_type'][i]}', '{revenue_estimate['current_qtr'][i]}', '{revenue_estimate['current_qtr_name'][i]}','{revenue_estimate['next_qtr'][i]}', '{revenue_estimate['next_qtr_name'][i]}', '{revenue_estimate['current_year'][i]}', '{revenue_estimate['current_year_name'][i]}', '{revenue_estimate['next_year'][i]}', '{revenue_estimate['next_year_name'][i]}')")
+            params = (revenue_estimate['stock_id'][i], revenue_estimate['data_type'][i], revenue_estimate['current_qtr'][i], revenue_estimate['current_qtr_name'][i], revenue_estimate['next_qtr'][i], revenue_estimate['next_qtr_name'][i], revenue_estimate['current_year'][i], revenue_estimate['current_year_name'][i], revenue_estimate['next_year'][i], revenue_estimate['next_year_name'][i])
+            cursor.execute(sql_insert_revenue_estimate, params)
 
         for i in range(len(earnings_history)):
-            cursor.execute(
-                f"insert into earningshistory(stock_id, data_type, four_back, four_date, three_back, three_date, two_back, two_date, one_back, one_date) values ('{earnings_history['stock_id'][i]}', '{earnings_history['data_type'][i]}', '{earnings_history['four_back'][i]}', '{earnings_history['four_date'][i]}','{earnings_history['three_back'][i]}', '{earnings_history['three_date'][i]}', '{earnings_history['two_back'][i]}', '{earnings_history['two_date'][i]}', '{earnings_history['one_back'][i]}', '{earnings_history['one_date'][i]}')")
-
+            params = (earnings_history['stock_id'][i], earnings_history['data_type'][i], earnings_history['four_back'][i], earnings_history['four_date'][i], earnings_history['three_back'][i], earnings_history['three_date'][i], earnings_history['two_back'][i], earnings_history['two_date'][i], earnings_history['one_back'][i], earnings_history['one_date'][i])
+            cursor.execute(sql_insert_earnings_history, params)
 
     # put all into database
     print("Daily pull done")
@@ -651,13 +649,15 @@ def pull_all(cursor):
         print(any_data)
         return
 
+    # TODO: UNCOMMENT THIS LATER
     initialize_stocks()
 
     for stock in stock_list:
         # PRICE DATABASE
+        yesterday = dt.date.today() - dt.timedelta(days=1)
+        end_date = yesterday.strftime("%m/%d/%y")
 
-        # TODO: REMOVE END DATE LATER
-        stock_data = sti.get_data(stock, start_date="01/01/2021", end_date="10/17/2023")
+        stock_data = sti.get_data(stock, start_date="01/01/2021", end_date=end_date)
         print(stock_data)
 
         stock_data['date'] = stock_data.index
@@ -676,7 +676,7 @@ def pull_all(cursor):
         # drop index
         stock_data.reset_index(drop=True, inplace=True)
 
-        stock_data = stock_data.fillna(-3012)
+        stock_data = stock_data.fillna('a')
 
         cursor.execute(f"select stock_id from stock where stock_name = '{stock_data['stock_id'][0]}'")
         stock_id = cursor.fetchone()
@@ -687,7 +687,12 @@ def pull_all(cursor):
 
         # ADD TO PRICE DATABASE
         for i in range(len(stock_data)):
-            cursor.execute(f"insert into price(stock_id, date, open_price, close_price, low_price, high_price, percent_change, adjusted_close_price, volume) values ('{stock_data['stock_id'][i]}', '{stock_data['date'][i]}', '{stock_data['open_price'][i]}', '{stock_data['close_price'][i]}','{stock_data['low_price'][i]}', '{stock_data['high_price'][i]}', '{stock_data['percent_change'][i]}', '{stock_data['adjusted_close_price'][i]}', '{stock_data['volume'][i]}')")
+            params = (str(stock_data['stock_id'][i]), stock_data['date'][i],
+                      stock_data['open_price'][i], stock_data['close_price'][i],
+                      stock_data['low_price'][i], stock_data['high_price'][i],
+                      stock_data['percent_change'][i], stock_data['adjusted_close_price'][i],
+                      str(stock_data['volume'][i]))
+            cursor.execute(sql_insert_price, params)
 
         # ADD INDICATORS
         # calculate SMA, EMA, BB, RSI, %R, SO, M
@@ -716,15 +721,17 @@ def pull_all(cursor):
         all_indicators = all_indicators.join(percent_m_14)
 
 
-        all_indicators = all_indicators.fillna(-3012)
-        print(all_indicators)
+        all_indicators = all_indicators.fillna('a')
 
         for i in range(len(all_indicators)):
-            cursor.execute(f"insert into indicators(stock_id, date, sma, ema, bb_middle, bb_lower, bb_upper, roc, r_percent, si_k, si_d, rsi) values ('{all_indicators['stock_id'][i]}', '{all_indicators['date'][i]}', '{all_indicators['sma'][i]}', '{all_indicators['ema'][i]}','{all_indicators['bb_middle'][i]}', '{all_indicators['bb_lower'][i]}', '{all_indicators['bb_upper'][i]}', '{all_indicators['roc'][i]}', '{all_indicators['percent_r'][i]}', '{all_indicators['p_k'][i]}', '{all_indicators['p_d'][i]}', '{all_indicators['rsi'][i]}')")
+            params = (str(all_indicators['stock_id'][i]), all_indicators['date'][i], all_indicators['sma'][i],
+                      all_indicators['ema'][i], all_indicators['bb_middle'][i], all_indicators['bb_lower'][i],
+                      all_indicators['bb_upper'][i], all_indicators['roc'][i], all_indicators['percent_r'][i],
+                      all_indicators['p_k'][i], all_indicators['p_d'][i], all_indicators['rsi'][i])
+            cursor.execute(sql_insert_indicators, params)
 
         # options, analyst ratings not available for past, pull most recent
-        # TODO: CHANGE THIS BACK LATER
-        yesterday = dt.date.today() - dt.timedelta(days=2)
+        yesterday = dt.date.today() - dt.timedelta(days=1)
         start_date = yesterday.strftime("%m/%d/%y")
 
         calls, puts = pull_options(current_date=start_date)
@@ -732,12 +739,23 @@ def pull_all(cursor):
         calls['stock_id'] = stock_id[0]
         puts['stock_id'] = stock_id[0]
 
+        parsed_date = datetime.datetime.strptime(calls['date'][0], "%m/%d/%y")
+        calls['date'] = parsed_date.strftime("%Y-%m-%d")
+        puts['date'] = parsed_date.strftime("%Y-%m-%d")
+
         for i in range(len(calls)):
-            cursor.execute(f"insert into options(stock_id, date, expiration_date, option_type, strike_price, bid, ask, change, percent_change, volume, open_interest, implied_volatility) values ('{calls['stock_id'][i]}', '{calls['date'][i]}', '{calls['expiration_date'][i]}', '{calls['option_type'][i]}', '{calls['strike_price'][i]}', '{calls['bid'][i]}', '{calls['ask'][i]}', '{calls['change'][i]}', '{calls['percent_change'][i]}', '{calls['volume'][i]}', '{calls['open_interest'][i]}', '{calls['implied_volatility'][i]}')")
+            params = (str(calls['stock_id'][i]), calls['date'][i], calls['expiration_date'][i], calls['option_type'][i],
+                      calls['strike_price'][i], calls['bid'][i], calls['ask'][i], calls['change'][i],
+                      calls['percent_change'][i], str(calls['volume'][i]), calls['open_interest'][i],
+                      calls['implied_volatility'][i])
+            cursor.execute(sql_insert_options, params)
 
         for i in range(len(puts)):
-            cursor.execute(f"insert into options(stock_id, date, expiration_date, option_type, strike_price, bid, ask, change, percent_change, volume, open_interest, implied_volatility) values ('{puts['stock_id'][i]}', '{puts['date'][i]}', '{puts['expiration_date'][i]}', '{puts['option_type'][i]}', '{puts['strike_price'][i]}', '{puts['bid'][i]}', '{puts['ask'][i]}', '{puts['change'][i]}', '{puts['percent_change'][i]}', '{puts['volume'][i]}', '{puts['open_interest'][i]}', '{puts['implied_volatility'][i]}')")
-
+            params = (str(puts['stock_id'][i]), puts['date'][i], puts['expiration_date'][i], puts['option_type'][i],
+                      puts['strike_price'][i], puts['bid'][i], puts['ask'][i], puts['change'][i],
+                      puts['percent_change'][i], str(puts['volume'][i]), puts['open_interest'][i],
+                      puts['implied_volatility'][i])
+            cursor.execute(sql_insert_options, params)
 
         earnings_estimate, revenue_estimate, earnings_history = pull_analyst()
 
@@ -746,13 +764,28 @@ def pull_all(cursor):
         earnings_history['stock_id'] = stock_id[0]
 
         for i in range(len(earnings_estimate)):
-            cursor.execute(f"insert into earningsestimate(stock_id, data_type, current_qtr, current_qtr_name, next_qtr, next_qtr_name, current_year, current_year_name, next_year, next_year_name) values ('{earnings_estimate['stock_id'][i]}', '{earnings_estimate['data_type'][i]}', '{earnings_estimate['current_qtr'][i]}', '{earnings_estimate['current_qtr_name'][i]}','{earnings_estimate['next_qtr'][i]}', '{earnings_estimate['next_qtr_name'][i]}', '{earnings_estimate['current_year'][i]}', '{earnings_estimate['current_year_name'][i]}', '{earnings_estimate['next_year'][i]}', '{earnings_estimate['next_year_name'][i]}')")
+            params = (str(earnings_estimate['stock_id'][i]), earnings_estimate['data_type'][i],
+                      earnings_estimate['current_qtr'][i], earnings_estimate['current_qtr_name'][i],
+                      earnings_estimate['next_qtr'][i], earnings_estimate['next_qtr_name'][i],
+                      earnings_estimate['current_year'][i], earnings_estimate['current_year_name'][i],
+                      earnings_estimate['next_year'][i], earnings_estimate['next_year_name'][i])
+            cursor.execute(sql_insert_earnings_estimate, params)
 
         for i in range(len(revenue_estimate)):
-            cursor.execute(f"insert into revenueestimate(stock_id, data_type, current_qtr, current_qtr_name, next_qtr, next_qtr_name, current_year, current_year_name, next_year, next_year_name) values ('{revenue_estimate['stock_id'][i]}', '{revenue_estimate['data_type'][i]}', '{revenue_estimate['current_qtr'][i]}', '{revenue_estimate['current_qtr_name'][i]}','{revenue_estimate['next_qtr'][i]}', '{revenue_estimate['next_qtr_name'][i]}', '{revenue_estimate['current_year'][i]}', '{revenue_estimate['current_year_name'][i]}', '{revenue_estimate['next_year'][i]}', '{revenue_estimate['next_year_name'][i]}')")
+            params = (str(revenue_estimate['stock_id'][i]), revenue_estimate['data_type'][i],
+                      revenue_estimate['current_qtr'][i], revenue_estimate['current_qtr_name'][i],
+                      revenue_estimate['next_qtr'][i], revenue_estimate['next_qtr_name'][i],
+                      revenue_estimate['current_year'][i], revenue_estimate['current_year_name'][i],
+                      revenue_estimate['next_year'][i], revenue_estimate['next_year_name'][i])
+            cursor.execute(sql_insert_revenue_estimate, params)
 
         for i in range(len(earnings_history)):
-            cursor.execute(f"insert into earningshistory(stock_id, data_type, four_back, four_date, three_back, three_date, two_back, two_date, one_back, one_date) values ('{earnings_history['stock_id'][i]}', '{earnings_history['data_type'][i]}', '{earnings_history['four_back'][i]}', '{earnings_history['four_date'][i]}','{earnings_history['three_back'][i]}', '{earnings_history['three_date'][i]}', '{earnings_history['two_back'][i]}', '{earnings_history['two_date'][i]}', '{earnings_history['one_back'][i]}', '{earnings_history['one_date'][i]}')")
+            params = (str(earnings_history['stock_id'][i]), earnings_history['data_type'][i],
+                      earnings_history['four_back'][i], earnings_history['four_date'][i],
+                      earnings_history['three_back'][i], earnings_history['three_date'][i],
+                      earnings_history['two_back'][i], earnings_history['two_date'][i],
+                      earnings_history['one_back'][i], earnings_history['one_date'][i])
+            cursor.execute(sql_insert_earnings_history, params)
 
     return
 # endregion
@@ -824,16 +857,16 @@ if __name__ == "__main__":
     conn = pyodbc.connect(connection_string)
     cursor = conn.cursor()
 
-    """
     pull_all(cursor)
-    """
 
     cursor.commit()
 
     cursor.close()
     conn.close()
 
-    pull_daily()
+    # pull_daily()
+
+    schedule.every().day.at("22:00").do(pull_daily)
 
     """
     while True:
