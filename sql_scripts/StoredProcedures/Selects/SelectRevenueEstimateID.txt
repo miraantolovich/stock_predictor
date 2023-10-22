@@ -1,0 +1,27 @@
+USE [Stock_Information]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[SelectRevenueEstimateID]
+	@param_stock_id varchar(5)
+AS
+BEGIN
+    -- SET NOCOUNT ON added to prevent extra result sets from
+    -- interfering with SELECT statements.
+    SET NOCOUNT ON;
+
+	DECLARE @stock_id AS INT;
+
+	SET @stock_id = TRY_CAST(REPLACE( @param_stock_id, ',', '') AS INT)
+
+    SELECT 
+		stock_id, data_type, current_qtr, current_qtr_name,
+		next_qtr, next_qtr_name, current_year, current_year_name,
+		next_year, next_year_name
+	FROM [Stock_Information].[dbo].[RevenueEstimate]
+    WHERE stock_id = @stock_id;
+END

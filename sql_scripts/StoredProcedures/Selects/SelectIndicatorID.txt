@@ -1,0 +1,27 @@
+USE [Stock_Information]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[SelectIndicatorID]
+	@param_stock_id varchar(5)
+AS
+BEGIN
+    -- SET NOCOUNT ON added to prevent extra result sets from
+    -- interfering with SELECT statements.
+    SET NOCOUNT ON;
+
+	DECLARE @stock_id AS INT;
+
+	SET @stock_id = TRY_CAST(REPLACE( @param_stock_id, ',', '') AS INT)
+
+    SELECT 
+		stock_id, date, sma, ema,
+		bb_middle, bb_lower, bb_upper, 
+		roc, r_percent, si_k, si_d, rsi
+	FROM [Stock_Information].[dbo].[Indicators]
+    WHERE stock_id = @stock_id;
+END

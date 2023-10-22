@@ -1,0 +1,27 @@
+USE [Stock_Information]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[SelectEarningsHistoryID]
+	@param_stock_id varchar(5)
+AS
+BEGIN
+    -- SET NOCOUNT ON added to prevent extra result sets from
+    -- interfering with SELECT statements.
+    SET NOCOUNT ON;
+
+	DECLARE @stock_id AS INT;
+
+	SET @stock_id = TRY_CAST(REPLACE( @param_stock_id, ',', '') AS INT)
+
+    SELECT 
+		stock_id, data_type, four_back, four_date,
+		three_back, three_date, two_back, two_date,
+		one_back, one_date
+	FROM [Stock_Information].[dbo].[EarningsHistory]
+    WHERE stock_id = @stock_id;
+END
