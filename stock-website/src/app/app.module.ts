@@ -6,6 +6,8 @@ import { AppComponent } from './app.component';
 import { NgApexchartsModule } from "ng-apexcharts";
 import { StockChartComponent } from './stock-chart/stock-chart.component';
 
+import { HttpClientModule } from '@angular/common/http';
+
 
 @NgModule({
   declarations: [
@@ -16,6 +18,7 @@ import { StockChartComponent } from './stock-chart/stock-chart.component';
     BrowserModule,
     FormsModule,
     NgApexchartsModule,
+    HttpClientModule
     ],
   providers: [],
   bootstrap: [AppComponent]

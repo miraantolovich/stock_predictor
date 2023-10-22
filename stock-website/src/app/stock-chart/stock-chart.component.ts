@@ -1,6 +1,8 @@
 // #region Setup
 import { Component, ViewChild } from "@angular/core";
 import { ReactiveFormsModule } from '@angular/forms';
+import { ApiService } from '../api.service';
+
 import {
   ChartComponent,
   ApexAxisChartSeries,
@@ -186,6 +188,7 @@ export class StockChartComponent {
   // #region Constructor
   constructor() {  
     // TODO: PULL CORRECT INITIAL DATA
+    
     this.initCharts()
     // TODO: DO OPTIONS
   }

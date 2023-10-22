@@ -360,4 +360,4 @@ class APITesting(unittest.TestCase):
 
 if __name__ == '__main__':
     app.run(debug=True)
-    unittest.main()
+    # unittest.main()
