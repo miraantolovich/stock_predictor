@@ -1,0 +1,27 @@
+USE [Stock_Information]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[SelectStockTop]
+	@param_stock_id varchar(5)
+AS
+BEGIN
+    -- SET NOCOUNT ON added to prevent extra result sets from
+    -- interfering with SELECT statements.
+    SET NOCOUNT ON;
+
+	DECLARE @stock_id AS INT;
+
+	SET @stock_id = TRY_CAST(REPLACE( @param_stock_id, ',', '') AS INT)
+
+    SELECT TOP 50 
+		stock_id, date, open_price, close_price, low_price,
+		high_price, percent_change, adjusted_close_price, volume
+    FROM [dbo].Price
+    WHERE stock_id = @stock_id
+    ORDER BY date DESC;
+END

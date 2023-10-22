@@ -1,0 +1,17 @@
+USE [Stock_Information]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[SelectStock]
+AS
+BEGIN
+    -- SET NOCOUNT ON added to prevent extra result sets from
+    -- interfering with SELECT statements.
+    SET NOCOUNT ON;
+
+    SELECT stock_id, stock_name, stock_long_name FROM [dbo].Stock;
+END
