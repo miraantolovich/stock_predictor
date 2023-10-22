@@ -25,8 +25,8 @@ pd.set_option('display.max_columns', None)
 
 # get list of all stocks to compare
 # INTC (large), CWH (small-med), GBX (small), SOFI (medium), SUZ (medium), AAL (medium)
-stock_list = ["INTC"]
-# stock_list = ["INTC", "CWH", "GBX", "SOFI", "SUZ", "AAL"]
+# stock_list = ["INTC"]
+stock_list = ["INTC", "CWH", "GBX", "SOFI", "SUZ", "AAL"]
 stock_name = ["Intel Corporation", "Camping World Holdings", "The Greenbrier Companies", "SoFi Technologies",
               "Suzano S.A.", "American Airlines Group"]
 # endregion
@@ -685,6 +685,8 @@ def pull_all(cursor):
         cursor.execute(sql_select_stock_with_id, stock_data['stock_id'][0])
         stock_id = cursor.fetchone()
 
+        print(stock_data)
+        print(stock_id)
         stock_data['stock_id'] = stock_id[0]
 
         print(stock_data)

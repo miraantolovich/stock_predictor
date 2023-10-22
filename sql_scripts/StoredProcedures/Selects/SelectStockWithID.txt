@@ -7,18 +7,18 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 ALTER PROCEDURE [dbo].[SelectStockWithID]
-	@param_stock_id varchar(5)
+	@param_stock_name VARCHAR(16)
 AS
 BEGIN
     -- SET NOCOUNT ON added to prevent extra result sets from
     -- interfering with SELECT statements.
     SET NOCOUNT ON;
 
-	DECLARE @stock_id AS INT;
+	DECLARE @stock_name AS VARCHAR(16);
 
-	SET @stock_id = TRY_CAST(REPLACE( @param_stock_id, ',', '') AS INT)
+	SET @stock_name = @param_stock_name
 
     SELECT stock_id
     FROM [dbo].Stock
-    WHERE stock_id = @stock_id;
+    WHERE stock_name = @stock_name;
 END

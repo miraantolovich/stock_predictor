@@ -39,7 +39,7 @@ export type ChartOptions = {
 })
 //#endregion
 
-export class StockChartComponent {
+export class StockChartComponent implements OnInit{
   // #region Variables
   @ViewChild("chart", { static: false }) chart: ChartComponent;
 
@@ -186,12 +186,16 @@ export class StockChartComponent {
 
 
   // #region Constructor
+
+  /** 
   constructor() {  
     // TODO: PULL CORRECT INITIAL DATA
     
     this.initCharts()
     // TODO: DO OPTIONS
   }
+  */
+  constructor(private apiService: ApiService) {}
 
   public initCharts(): void {
     this.commonOptions = {
@@ -265,6 +269,17 @@ export class StockChartComponent {
         width: [4, 4, 4, 4, 4, 4],
       }
     };
+  }
+
+  ngOnInit(): void {
+    // Fetch your data from the API when the component initializes
+    this.apiService.getStocks().subscribe(data => {
+      // Process the data and set it to your component properties
+      this.stockTypes = data.map(stock => stock.stock_name); // Extract stock names from all items
+      // Call any other functions that depend on this data
+    });
+
+    this.initCharts();
   }
   // #endregion
 

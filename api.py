@@ -346,7 +346,7 @@ class APITesting(unittest.TestCase):
         self.assertTrue(isinstance(data, list))
         # Add more specific assertions based on the expected data format
 
-    def test_get_revenuehistory(self):
+    def test_get_revenueestimate(self):
         stock_id = 1
         response = self.app.get(f'/api/revenueestimate/{stock_id}')
         print(response)
@@ -360,4 +360,4 @@ class APITesting(unittest.TestCase):
 
 if __name__ == '__main__':
     app.run(debug=True)
-    # unittest.main()
+    unittest.main()
