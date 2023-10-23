@@ -97,7 +97,7 @@ export interface IRevenueEstimate {
   providedIn: 'root'
 })
 export class ApiService {
-  private apiBaseUrl = 'http://localhost:5000/api'; 
+  private apiBaseUrl = 'http://127.0.0.1:5000/api'; 
 
   constructor(private http: HttpClient) { }
 

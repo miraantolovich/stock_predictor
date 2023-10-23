@@ -2,6 +2,8 @@
 import { Component, ViewChild } from "@angular/core";
 import { ReactiveFormsModule } from '@angular/forms';
 import { ApiService } from '../api.service';
+import { DatePipe } from '@angular/common';
+
 
 import {
   ChartComponent,
@@ -39,7 +41,7 @@ export type ChartOptions = {
 })
 //#endregion
 
-export class StockChartComponent implements OnInit{
+export class StockChartComponent {
   // #region Variables
   @ViewChild("chart", { static: false }) chart: ChartComponent;
 
@@ -49,7 +51,7 @@ export class StockChartComponent implements OnInit{
 
   protected graphTypes = ["line", "candle"];
   // implement candle later based on data
-  protected stockTypes = ["AAPL", "GOOG", "MSFT"];
+  protected stockTypes = ["AAPL"];
 
   protected selectedGraphType = this.graphTypes[0];
   protected selectedStockType = this.stockTypes[0];
@@ -59,7 +61,7 @@ export class StockChartComponent implements OnInit{
 
   protected x_axis_data = ["Jan", "Feb",  "Mar",  "Apr",  "May",  "Jun",  "Jul",  "Aug", "Sep"]
   
-  protected advanced_data = [10000, 41000, 35000, 51000, 49000, 62000, 69000, 91000, 148000];
+  protected volume_data = [10000, 41000, 35000, 51000, 49000, 62000, 69000, 91000, 148000];
   protected roc_data = [1, 2, 3, 0, -3, -2, -4, 1, 0]
   
   protected additional_details = {    
@@ -89,10 +91,9 @@ export class StockChartComponent implements OnInit{
   protected options_type = ["Calls", "Puts"];
   protected selectedOptionsType = this.options_type[0];
 
-  protected options_details = [
+  protected options_data = [
     {
       strike_price: "150",
-      last_price: "184.05",
       bid: "182.85",
       ask: "183.25",
       change: "-2.05",
@@ -103,7 +104,6 @@ export class StockChartComponent implements OnInit{
     },
     {
       strike_price: "155",
-      last_price: "184.05",
       bid: "182.85",
       ask: "183.25",
       change: "-2.05",
@@ -114,7 +114,6 @@ export class StockChartComponent implements OnInit{
     },
     {
       strike_price: "160",
-      last_price: "184.05",
       bid: "182.85",
       ask: "183.25",
       change: "-2.05",
@@ -126,7 +125,6 @@ export class StockChartComponent implements OnInit{
     ,
     {
       strike_price: "165",
-      last_price: "184.05",
       bid: "182.85",
       ask: "183.25",
       change: "-2.05",
@@ -137,7 +135,6 @@ export class StockChartComponent implements OnInit{
     },
     {
       strike_price: "170",
-      last_price: "184.05",
       bid: "182.85",
       ask: "183.25",
       change: "-2.05",
@@ -148,7 +145,6 @@ export class StockChartComponent implements OnInit{
     },
     {
       strike_price: "175",
-      last_price: "184.05",
       bid: "182.85",
       ask: "183.25",
       change: "-2.05",
@@ -159,7 +155,6 @@ export class StockChartComponent implements OnInit{
     },
     {
       strike_price: "180",
-      last_price: "184.05",
       bid: "182.85",
       ask: "183.25",
       change: "-2.05",
@@ -184,29 +179,76 @@ export class StockChartComponent implements OnInit{
   protected bbColor = "#FAC748"
   // #endregion
 
+  constructor(private apiService: ApiService) {
+    // Fetch your data from the API when the component initializes
+    this.apiService.getStocks().subscribe(data => {
+      // Process the data and set it to your component properties
+      this.stockTypes = data.map(stock => stock.stock_name); // Extract stock names from all items
+      // Call any other functions that depend on this data
+      console.log(this.stockTypes)
+      this.selectedStockType = this.stockTypes[0]
+    });
 
-  // #region Constructor
-
-  /** 
-  constructor() {  
-    // TODO: PULL CORRECT INITIAL DATA
+    let index = this.stockTypes.indexOf(this.selectedStockType);
+    const datePipe = new DatePipe('en-US');
+    console.log(index);
     
-    this.initCharts()
-    // TODO: DO OPTIONS
-  }
-  */
-  constructor(private apiService: ApiService) {}
+    this.apiService.getPrice((index + 1).toString()).subscribe(data => {
+      this.stock_data = data.map(price => ({
+        x: datePipe.transform(new Date(price.date), 'yyyy-MM-dd') || '',
+        y: parseFloat(price.adjusted_close_price)
+      }));
 
-  public initCharts(): void {
-    this.commonOptions = {
-      markers: {
-        size: 3,
-        hover: {
-          size: 5
-        }
+      this.x_axis_data = data.map(price => datePipe.transform(new Date(price.date), 'yyyy-MM-dd') || '');
+      this.volume_data = data.map(volume => volume.volume)
+
+      console.log(this.stock_data);
+      console.log(this.x_axis_data)
+    });
+
+    this.apiService.getOption((index + 1).toString()).subscribe(data => {
+
+      function convertToDateSimplified(dateString: string) {
+        return datePipe.transform(new Date(dateString), 'dd MMM yyyy') || '';
       }
+      
+      let expirationDates = data.map(item => item.expiration_date);
+      const uniqueExpirationDatesSet = new Set(expirationDates);
+      const uniqueExpirationDatesArray = Array.from(uniqueExpirationDatesSet);
+      const simplifiedDates = uniqueExpirationDatesArray.map(convertToDateSimplified);
+
+      console.log(simplifiedDates);
+      this.options_dates = simplifiedDates;
+      this.selectedOptionsDate = this.options_dates[0];
+
+      const filteredOptions = data.filter(option => convertToDateSimplified(option.expiration_date) === this.selectedOptionsDate && option.option_type === this.selectedOptionsType.toLowerCase());
+
+      console.log(filteredOptions)
+
+      this.options_data = filteredOptions.map(data => ({
+        strike_price: data.strike_price,
+        bid: data.bid,
+        ask: data.ask,
+        change: data.change,
+        percent_change: data.percent_change,
+        volume: data.volume,
+        open_interest: data.open_interest,
+        implied_volatility: data.implied_volatility,  
+      }));
+
+      console.log(this.options_data)
+
+    });
+
+    this.initCharts();
+  }
+
+  private initCharts(): void {
+    this.commonOptions = {
     };
 
+    console.log("loading?")
+    console.log(this.stock_data)
     this.chart1Options = {
       series: [
         {
@@ -222,6 +264,7 @@ export class StockChartComponent implements OnInit{
           group: "stock"
       },
       xaxis: {
+        forceNiceScale: true,
         categories: this.x_axis_data
       },
       yaxis: {
@@ -238,7 +281,7 @@ export class StockChartComponent implements OnInit{
       series: [
         {
           name: "Volume",
-          data: this.advanced_data,
+          data: this.volume_data,
         }
       ],
       colors: [this.stockColor],
@@ -271,16 +314,6 @@ export class StockChartComponent implements OnInit{
     };
   }
 
-  ngOnInit(): void {
-    // Fetch your data from the API when the component initializes
-    this.apiService.getStocks().subscribe(data => {
-      // Process the data and set it to your component properties
-      this.stockTypes = data.map(stock => stock.stock_name); // Extract stock names from all items
-      // Call any other functions that depend on this data
-    });
-
-    this.initCharts();
-  }
   // #endregion
 
 
@@ -310,6 +343,29 @@ export class StockChartComponent implements OnInit{
     var all_colors = []
 
     // get stock data just close
+    let index = this.stockTypes.indexOf(this.selectedStockType);
+    const datePipe = new DatePipe('en-US');
+    console.log(index);
+    
+    this.apiService.getPrice((index + 1).toString()).subscribe(data => {
+      this.stock_data = data.map(price => ({
+        x: datePipe.transform(new Date(price.date), 'yyyy-MM-dd') || '',
+        y: parseFloat(price.adjusted_close_price)
+      }));
+
+      this.x_axis_data = data.map(price => datePipe.transform(new Date(price.date), 'yyyy-MM-dd') || '');
+
+      this.volume_data = data.map(volume => volume.volume);
+
+      console.log(this.stock_data);
+      console.log(this.x_axis_data);
+      console.log(this.volume_data);
+    });
+
+    this.apiService.getIndicator((index + 1).toString()).subscribe(data => {
+
+    });
+    
     console.log("line")
     data_line.push({
       data: this.stock_data,
@@ -737,7 +793,7 @@ export class StockChartComponent implements OnInit{
         series: [
           {
             name: "Volume",
-            data: this.advanced_data,
+            data: this.volume_data,
           }
         ],
         chart: {
@@ -774,10 +830,9 @@ export class StockChartComponent implements OnInit{
   protected updateOptions() {
     console.log("update options");
 
-    this.options_details = [
+    this.options_data = [
       {
         strike_price: "155",
-        last_price: "184.05",
         bid: "182.85",
         ask: "183.25",
         change: "-2.05",
@@ -788,7 +843,6 @@ export class StockChartComponent implements OnInit{
       },
       {
         strike_price: "160",
-        last_price: "184.05",
         bid: "182.85",
         ask: "183.25",
         change: "-2.05",
@@ -799,7 +853,6 @@ export class StockChartComponent implements OnInit{
       },
       {
         strike_price: "165",
-        last_price: "184.05",
         bid: "182.85",
         ask: "183.25",
         change: "-2.05",
@@ -811,7 +864,6 @@ export class StockChartComponent implements OnInit{
       ,
       {
         strike_price: "170",
-        last_price: "184.05",
         bid: "182.85",
         ask: "183.25",
         change: "-2.05",

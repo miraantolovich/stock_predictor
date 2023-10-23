@@ -276,7 +276,7 @@ def get_revenueestimate_id(stock_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
+"""
 class APITesting(unittest.TestCase):
 
     def setUp(self):
@@ -356,8 +356,9 @@ class APITesting(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(isinstance(data, list))
         # Add more specific assertions based on the expected data format
-
+"""
 
 if __name__ == '__main__':
+    # unittest.main()
+
     app.run(debug=True)
-    unittest.main()

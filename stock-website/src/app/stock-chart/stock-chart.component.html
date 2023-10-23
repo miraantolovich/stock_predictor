@@ -172,7 +172,6 @@
         <thead>
           <tr>
             <th>Strike Price</th>
-            <th>Last Price</th>
             <th>Bid</th>
             <th>Ask</th>
             <th>Change</th>
@@ -183,9 +182,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let option of options_details">
+          <tr *ngFor="let option of options_data">
             <td>{{ option.strike_price }}</td>
-            <td>{{ option.last_price }}</td>
             <td>{{ option.bid }}</td>
             <td>{{ option.ask }}</td>
             <td>{{ option.change }}</td>

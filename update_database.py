@@ -134,7 +134,9 @@ def pull_options(current_date):
                     'implied_volatility': row['Implied Volatility']
                 }, ignore_index=True)
 
-        calls = calls.replace('-', '0.00%')
+        calls = calls['implied_volatility'].replace('-', '0.00%')
+        calls = calls['change'].replace('0', '0.00%')
+        calls = calls.replace('-', '0')
         calls['volume'] = pd.to_numeric(calls['volume'], errors='coerce').fillna(0)
         calls['expiration_date'] = pd.to_datetime(calls['expiration_date'], format='%B %d, %Y').dt.strftime('%m/%d/%y')
 
