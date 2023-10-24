@@ -117,15 +117,10 @@ ON Indicators(stock_id, date);
 CREATE TABLE EarningsEstimate (
 	earnings_estimate_id INT IDENTITY(1,1) PRIMARY KEY,
     stock_id INT,
-    data_type VARCHAR(16),
-    current_qtr VARCHAR(10),
-	current_qtr_name VARCHAR(32),
-    next_qtr VARCHAR(10),
-	next_qtr_name VARCHAR(32),
-    current_year VARCHAR(10),
-	current_year_name VARCHAR(32),
-    next_year VARCHAR(10),
-	next_year_name VARCHAR(32),
+    date VARCHAR(32),
+	average VARCHAR(16),
+    low VARCHAR(16),
+	high VARCHAR(16),
     CONSTRAINT FK_EarningsEstimate_Stock FOREIGN KEY (stock_id) REFERENCES Stock (stock_id),
 );
 
@@ -137,15 +132,10 @@ ON EarningsEstimate(stock_id);
 CREATE TABLE RevenueEstimate (
 	analyst_id INT IDENTITY(1,1) PRIMARY KEY,
     stock_id INT,
-    data_type VARCHAR(16),
-    current_qtr VARCHAR(10),
-	current_qtr_name VARCHAR(32),
-    next_qtr VARCHAR(10),
-	next_qtr_name VARCHAR(32),
-    current_year VARCHAR(10),
-	current_year_name VARCHAR(32),
-    next_year VARCHAR(10),
-	next_year_name VARCHAR(32),    
+    date VARCHAR(32),
+	average VARCHAR(16),
+    low VARCHAR(16),
+	high VARCHAR(16),
 	CONSTRAINT FK_RevenueEstimate_Stock FOREIGN KEY (stock_id) REFERENCES Stock (stock_id),
 );
 
@@ -156,15 +146,10 @@ ON RevenueEstimate(stock_id);
 CREATE TABLE EarningsHistory (
 	earnings_id INT IDENTITY(1,1) PRIMARY KEY,
     stock_id INT,
-    data_type VARCHAR(16),
-    four_back DECIMAL(8, 2),
-	four_date DATE,
-    three_back DECIMAL(8, 2),
-	three_date DATE,
-    two_back DECIMAL(8, 2),
-	two_date DATE,
-    one_back DECIMAL(8, 2),
-	one_date DATE,
+    year VARCHAR(32),
+	average VARCHAR(16),
+    actual VARCHAR(16),
+	difference VARCHAR(16),
     CONSTRAINT FK_EarningsHistory_Stock FOREIGN KEY (stock_id) REFERENCES Stock (stock_id),
 );
 

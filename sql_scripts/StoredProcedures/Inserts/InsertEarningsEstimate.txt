@@ -9,15 +9,11 @@ GO
 
 ALTER PROCEDURE [dbo].[InsertEarningsEstimate]
         @param_stock_id AS VARCHAR(16),
-        @param_data_type AS VARCHAR(16),
-		@param_current_qtr VARCHAR(10),
-		@param_current_qtr_name AS VARCHAR(32),
-		@param_next_qtr AS VARCHAR(10),
-		@param_next_qtr_name AS VARCHAR(32),
-		@param_current_year AS VARCHAR(10),
-		@param_current_year_name AS VARCHAR(32),
-		@param_next_year AS VARCHAR(10),
-		@param_next_year_name AS VARCHAR(32)
+		@param_data_order AS VARCHAR(4),
+        @param_date AS VARCHAR(32),
+		@param_average VARCHAR(16),
+		@param_low AS VARCHAR(16),
+		@param_high AS VARCHAR(16)
 AS
 BEGIN
     -- SET NOCOUNT ON added to prevent extra result sets from
@@ -25,54 +21,41 @@ BEGIN
     SET NOCOUNT ON;
 
 	DECLARE @stock_id AS INT;
-    DECLARE @data_type AS VARCHAR(16);
-	DECLARE @current_qtr VARCHAR(10);
-	DECLARE @current_qtr_name AS VARCHAR(32);
-	DECLARE @next_qtr AS VARCHAR(10);
-    DECLARE @next_qtr_name AS VARCHAR(32);
-    DECLARE @current_year AS VARCHAR(10);
-    DECLARE @current_year_name AS VARCHAR(32);
-    DECLARE @next_year AS VARCHAR(10);
-	DECLARE @next_year_name AS VARCHAR(32);
+	DECLARE @data_order AS INT;
+    DECLARE @date AS VARCHAR(32);
+	DECLARE @average VARCHAR(16);
+	DECLARE @low AS VARCHAR(16);
+	DECLARE @high AS VARCHAR(16);
 
 	SET @stock_id = TRY_CAST(REPLACE( @param_stock_id, ',', '') AS INT)
-	SET @data_type = @param_data_type
-	SET @current_qtr = @param_current_qtr
-	SET @current_qtr_name = @param_current_qtr_name
-	SET @next_qtr = @param_next_qtr
-	SET @next_qtr_name = @param_next_qtr_name
-	SET @current_year = @param_current_year
-	SET @current_year_name = @param_current_year_name
-	SET @next_year = @param_next_year
-	SET @next_year_name = @param_next_year_name
+	SET @data_order = TRY_CAST(REPLACE( @param_data_order, ',', '') AS INT)
+	SET @date = @param_date
+	SET @average = @param_average
+	SET @low = @param_low
+	SET @high = @param_high
 
     -- Insert statements for procedure here
 	IF EXISTS (
         SELECT 1
         FROM dbo.EarningsEstimate
-        WHERE stock_id = @stock_id
-		AND data_type = @data_type
+        WHERE stock_id = @stock_id AND data_order = @data_order
     )
     BEGIN
         -- If there are existing records for the stock_id, update those records
         UPDATE dbo.EarningsEstimate
-        SET current_qtr = @current_qtr,
-			current_qtr_name = @current_qtr_name,
-			next_qtr = @next_qtr,
-			next_qtr_name = @next_qtr_name,
-            current_year = @current_year,
-            current_year_name = @current_year_name,
-			next_year = @next_year,
-            next_year_name = @next_qtr_name
+        SET date = @date,
+			average = @average,
+			low = @low,
+			high = @high
         WHERE stock_id = @stock_id
-			AND data_type = @data_type
-			AND current_qtr_name <> @current_qtr_name;
+			AND data_order = @data_order
+			AND date <> @date;
     END
     ELSE
     BEGIN
         -- If there are no matching records for the stock_id, insert the new record
-		INSERT INTO dbo.EarningsEstimate( stock_id, data_type, current_qtr, current_qtr_name, next_qtr, next_qtr_name, current_year, current_year_name, next_year, next_year_name ) 
-		VALUES ( @stock_id, @data_type, @current_qtr, @current_qtr_name, @next_qtr, @next_qtr_name, @current_year, @current_year_name, @next_year, @next_year_name ); 
+		INSERT INTO dbo.EarningsEstimate( stock_id, data_order, date, average, low, high ) 
+		VALUES ( @stock_id, @data_order, @date, @average, @low, @high ); 
     END
 
 END

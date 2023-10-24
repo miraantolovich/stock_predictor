@@ -9,15 +9,12 @@ GO
 
 ALTER PROCEDURE [dbo].[InsertEarningsHistory]
         @param_stock_id AS VARCHAR(16),
-        @param_data_type AS VARCHAR(16),
-		@param_four_back VARCHAR(10),
-		@param_four_date AS VARCHAR(32),
-		@param_three_back AS VARCHAR(10),
-		@param_three_date AS VARCHAR(32),
-		@param_two_back AS VARCHAR(10),
-		@param_two_date AS VARCHAR(32),
-		@param_one_back AS VARCHAR(10),
-		@param_one_date AS VARCHAR(32)
+        @param_data_order AS VARCHAR(4),
+		@param_year VARCHAR(32),
+		@param_average AS VARCHAR(16),
+		@param_actual AS VARCHAR(16),
+		@param_difference AS VARCHAR(16)
+
 AS
 BEGIN
     -- SET NOCOUNT ON added to prevent extra result sets from
@@ -25,54 +22,41 @@ BEGIN
     SET NOCOUNT ON;
 
 	DECLARE @stock_id AS INT;
-    DECLARE @data_type AS VARCHAR(16);
-	DECLARE @four_back AS DECIMAL(8, 2);
-	DECLARE @four_date AS DATE;
-	DECLARE @three_back AS DECIMAL(8, 2);
-    DECLARE @three_date AS DATE;
-    DECLARE @two_back AS DECIMAL(8, 2);
-    DECLARE @two_date AS DATE;
-    DECLARE @one_back AS DECIMAL(8, 2);
-	DECLARE @one_date AS DATE;
+    DECLARE @data_order AS INT;
+	DECLARE @year VARCHAR(32);
+	DECLARE @average AS VARCHAR(16);
+	DECLARE @actual AS VARCHAR(16);
+    DECLARE @difference AS VARCHAR(16);
 
 	SET @stock_id = TRY_CAST(REPLACE( @param_stock_id, ',', '') AS INT)
-	SET @data_type = @param_data_type 
-	SET @four_back = TRY_CAST(REPLACE( @param_four_back, ',', '') AS DECIMAL(8, 2))
-	SET @four_date = TRY_CAST(REPLACE( @param_four_date, ',', '') AS DATE)
-	SET @three_back = TRY_CAST(REPLACE( @param_three_back, ',', '') AS DECIMAL(8, 2))
-	SET @three_date = TRY_CAST(REPLACE( @param_three_date, ',', '') AS DATE)
-	SET @two_back = TRY_CAST(REPLACE( @param_two_back, ',', '') AS DECIMAL(8, 2))
-	SET @two_date = TRY_CAST(REPLACE( @param_two_date, ',', '') AS DATE)
-	SET @one_back = TRY_CAST(REPLACE( @param_one_back, ',', '') AS DECIMAL(8, 2))
-	SET @one_date = TRY_CAST(REPLACE( @param_one_date, ',', '') AS DATE)
+	SET @data_order = TRY_CAST(REPLACE( @param_data_order, ',', '') AS INT) 
+	SET @year = @param_year
+	SET @average = @param_average
+	SET @actual = @param_actual
+	SET @difference = @param_difference
 
 
 	IF EXISTS (
         SELECT 1
         FROM dbo.EarningsHistory
-        WHERE stock_id = @stock_id
-		AND data_type = @data_type
+		WHERE stock_id = @stock_id AND data_order = @data_order
     )
     BEGIN
         -- If there are existing records for the stock_id, update those records
         UPDATE dbo.EarningsHistory
-        SET four_back = @four_back,
-			four_date = @four_date,
-            three_back = @three_back,
-            three_date = @three_date,
-            two_back = @two_back,
-            two_date = @two_date,
-            one_back = @one_back,
-			one_date = @one_date
+        SET year = @year,
+			average = @average,
+			actual = @actual,
+			difference = @difference
         WHERE stock_id = @stock_id
-			AND data_type = @data_type
-			AND four_date <> @four_date;
+			AND data_order = @data_order
+			AND year <> @year;
     END
     ELSE
     BEGIN
         -- If there are no matching records for the stock_id, insert the new record
-		INSERT INTO dbo.EarningsHistory( stock_id, data_type, four_back, four_date, three_back, three_date, two_back, two_date, one_back, one_date ) 
-		VALUES ( @stock_id, @data_type, @four_back, @four_date, @three_back, @three_date, @two_back, @two_date, @one_back, @one_date ); 
+		INSERT INTO dbo.EarningsHistory( stock_id, data_order, year, average, actual, difference ) 
+		VALUES ( @stock_id, @data_order, @year, @average, @actual, @difference ); 
     END
 
 END

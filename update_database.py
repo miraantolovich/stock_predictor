@@ -42,9 +42,9 @@ sql_insert_stock = "EXEC [Stock_Information].[dbo].[InsertStock] ?, ?"
 sql_insert_price = "EXEC [Stock_Information].[dbo].[InsertPrice] ?, ?, ?, ?, ?, ?, ?, ?, ?"
 sql_insert_indicators = "EXEC [Stock_Information].[dbo].[InsertIndicators] ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
 sql_insert_options = "EXEC [Stock_Information].[dbo].[InsertOptions] ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
-sql_insert_earnings_estimate = "EXEC [Stock_Information].[dbo].[InsertEarningsEstimate] ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
-sql_insert_earnings_history = "EXEC [Stock_Information].[dbo].[InsertEarningsHistory] ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
-sql_insert_revenue_estimate = "EXEC [Stock_Information].[dbo].[InsertRevenueEstimate] ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
+sql_insert_earnings_estimate = "EXEC [Stock_Information].[dbo].[InsertEarningsEstimate] ?, ?, ?, ?, ?, ?"
+sql_insert_earnings_history = "EXEC [Stock_Information].[dbo].[InsertEarningsHistory] ?, ?, ?, ?, ?, ?"
+sql_insert_revenue_estimate = "EXEC [Stock_Information].[dbo].[InsertRevenueEstimate] ?, ?, ?, ?, ?, ?"
 # endregion
 
 # region Set Up Database Selects
@@ -134,11 +134,17 @@ def pull_options(current_date):
                     'implied_volatility': row['Implied Volatility']
                 }, ignore_index=True)
 
-        calls = calls['implied_volatility'].replace('-', '0.00%')
-        calls = calls['change'].replace('0', '0.00%')
+        calls['implied_volatility'] = calls['implied_volatility'].replace('-', '0.00%')
+        calls['percent_change'] = calls['percent_change'].str.replace('-', '0.00%')
         calls = calls.replace('-', '0')
         calls['volume'] = pd.to_numeric(calls['volume'], errors='coerce').fillna(0)
         calls['expiration_date'] = pd.to_datetime(calls['expiration_date'], format='%B %d, %Y').dt.strftime('%m/%d/%y')
+
+        puts['implied_volatility'] = puts['implied_volatility'].replace('-', '0.00%')
+        puts['percent_change'] = puts['percent_change'].str.replace('-', '0.00%')
+        puts = puts.replace('-', '0')
+        puts['volume'] = pd.to_numeric(calls['volume'], errors='coerce').fillna(0)
+        puts['expiration_date'] = pd.to_datetime(puts['expiration_date'], format='%B %d, %Y').dt.strftime('%m/%d/%y')
 
         # print(calls.to_string())
 
@@ -256,193 +262,71 @@ def pull_options(current_date):
 
 
 # pull once a week, only update if changed?
-def pull_analyst():
-    for stock in stock_list:
-        get_analyst = sti.get_analysts_info(stock)
-        # print(get_analyst)
+def pull_analyst(stock):
+    get_analyst = sti.get_analysts_info(stock)
+    # print(get_analyst)
 
-        print("**** Earnings Estimate ****")
-        # print(get_analyst['Earnings Estimate'])
+    print("**** Earnings Estimate ****")
 
-        data = {
-            'stock_id': [],
-            'data_type': [],
-            'current_qtr': [],
-            'current_qtr_name': [],
-            'next_qtr': [],
-            'next_qtr_name': [],
-            'current_year': [],
-            'current_year_name': [],
-            'next_year': [],
-            'next_year_name': []
-        }
+    get_analyst = sti.get_analysts_info("AAPL")
+    # print(get_analyst["Earnings Estimate"])
 
-        column_list = get_analyst['Earnings Estimate'].columns.tolist()
-        # print("WAHHHH")
-        dates = column_list[1:5]
-        contents_in_parentheses = [re.search(r'\(([^)]+)\)', col).group(1) for col in dates]
-        # print(contents_in_parentheses)
+    earnings_estimate = pd.DataFrame(get_analyst["Earnings Estimate"])
 
-        # update the stock to stock ID later
-        earnings_estimate = pd.DataFrame(data)
-        earnings_estimate = earnings_estimate.append({
-            'stock_id': stock,
-            'data_type': 'earnings avg',
-            'current_qtr': get_analyst['Earnings Estimate'][column_list[1]][1],
-            'current_qtr_name': contents_in_parentheses[0],
-            'next_qtr': get_analyst['Earnings Estimate'][column_list[2]][1],
-            'next_qtr_name': contents_in_parentheses[1],
-            'current_year': get_analyst['Earnings Estimate'][column_list[3]][1],
-            'current_year_name': contents_in_parentheses[2],
-            'next_year': get_analyst['Earnings Estimate'][column_list[4]][1],
-            'next_year_name': contents_in_parentheses[3]
-        }, ignore_index=True)
+    earnings_estimate = earnings_estimate.T
 
-        earnings_estimate = earnings_estimate.append({
-            'stock_id': stock,
-            'data_type': 'earnings low',
-            'current_qtr': get_analyst['Earnings Estimate'][column_list[1]][2],
-            'current_qtr_name': contents_in_parentheses[0],
-            'next_qtr': get_analyst['Earnings Estimate'][column_list[2]][2],
-            'next_qtr_name': contents_in_parentheses[1],
-            'current_year': get_analyst['Earnings Estimate'][column_list[3]][2],
-            'current_year_name': contents_in_parentheses[2],
-            'next_year': get_analyst['Earnings Estimate'][column_list[4]][2],
-            'next_year_name': contents_in_parentheses[3]
-        }, ignore_index=True)
+    earnings_estimate.columns = earnings_estimate.iloc[0]
+    earnings_estimate = earnings_estimate[1:]
 
-        earnings_estimate = earnings_estimate.append({
-            'stock_id': stock,
-            'data_type': 'earnings high',
-            'current_qtr': get_analyst['Earnings Estimate'][column_list[1]][3],
-            'current_qtr_name': contents_in_parentheses[0],
-            'next_qtr': get_analyst['Earnings Estimate'][column_list[2]][3],
-            'next_qtr_name': contents_in_parentheses[1],
-            'current_year': get_analyst['Earnings Estimate'][column_list[3]][3],
-            'current_year_name': contents_in_parentheses[2],
-            'next_year': get_analyst['Earnings Estimate'][column_list[4]][3],
-            'next_year_name': contents_in_parentheses[3]
-        }, ignore_index=True)
+    # Reset the index
+    earnings_estimate = earnings_estimate.reset_index()
+    earnings_estimate = earnings_estimate.rename(columns={'index': 'Date'})
+    earnings_estimate['Date'] = earnings_estimate['Date'].str.extract(r'\((.*?)\)')
 
-        print(earnings_estimate)
+    # Reorder the rows
+    earnings_estimate = earnings_estimate[['Date', 'Avg. Estimate', 'Low Estimate', 'High Estimate']]
 
-        print()
-        print("**** Revenue Estimate ****")
-        # print(get_analyst['Revenue Estimate'])
+    # Display the formatted DataFrame
+    print(earnings_estimate)
 
-        column_list = get_analyst['Revenue Estimate'].columns.tolist()
-        dates = column_list[1:5]
-        contents_in_parentheses = [re.search(r'\(([^)]+)\)', col).group(1) for col in dates]
+    print("------------")
+    earnings_history = pd.DataFrame(get_analyst["Earnings History"])
 
-        revenue_estimate = pd.DataFrame(data)
+    earnings_history = earnings_history.T
 
-        # update the stock to stock ID later
-        revenue_estimate = revenue_estimate.append({
-            'stock_id': stock,
-            'data_type': 'revenue avg',
-            'current_qtr': get_analyst['Revenue Estimate'][column_list[1]][1],
-            'current_qtr_name': contents_in_parentheses[0],
-            'next_qtr': get_analyst['Revenue Estimate'][column_list[2]][1],
-            'next_qtr_name': contents_in_parentheses[1],
-            'current_year': get_analyst['Revenue Estimate'][column_list[3]][1],
-            'current_year_name': contents_in_parentheses[2],
-            'next_year': get_analyst['Revenue Estimate'][column_list[4]][1],
-            'next_year_name': contents_in_parentheses[3]
-        }, ignore_index=True)
+    earnings_history.columns = earnings_history.iloc[0]
+    earnings_history = earnings_history[1:]
 
-        revenue_estimate = revenue_estimate.append({
-            'stock_id': stock,
-            'data_type': 'revenue low',
-            'current_qtr': get_analyst['Revenue Estimate'][column_list[1]][2],
-            'current_qtr_name': contents_in_parentheses[0],
-            'next_qtr': get_analyst['Revenue Estimate'][column_list[2]][2],
-            'next_qtr_name': contents_in_parentheses[1],
-            'current_year': get_analyst['Revenue Estimate'][column_list[3]][2],
-            'current_year_name': contents_in_parentheses[2],
-            'next_year': get_analyst['Revenue Estimate'][column_list[4]][2],
-            'next_year_name': contents_in_parentheses[3]
-        }, ignore_index=True)
+    # Reset the index
+    earnings_history = earnings_history.reset_index()
+    earnings_history = earnings_history.rename(columns={'index': 'Date'})
 
-        revenue_estimate = revenue_estimate.append({
-            'stock_id': stock,
-            'data_type': 'revenue high',
-            'current_qtr': get_analyst['Revenue Estimate'][column_list[1]][3],
-            'current_qtr_name': contents_in_parentheses[0],
-            'next_qtr': get_analyst['Revenue Estimate'][column_list[2]][3],
-            'next_qtr_name': contents_in_parentheses[1],
-            'current_year': get_analyst['Revenue Estimate'][column_list[3]][3],
-            'current_year_name': contents_in_parentheses[2],
-            'next_year': get_analyst['Revenue Estimate'][column_list[4]][3],
-            'next_year_name': contents_in_parentheses[3]
-        }, ignore_index=True)
+    # Reorder the rows
+    earnings_history = earnings_history[['Date', 'EPS Est.', 'EPS Actual', 'Difference']]
+    # Display the formatted DataFrame
+    print(earnings_history)
 
-        print(revenue_estimate)
+    print("------------")
+    revenue_estimate = pd.DataFrame(get_analyst["Revenue Estimate"])
 
-        data = {
-            'stock_id': [],
-            'data_type': [],
-            'four_back': [],
-            'four_date': [],
-            'three_back': [],
-            'three_date': [],
-            'two_back': [],
-            'two_date': [],
-            'one_back': [],
-            'one_date': []
-        }
+    revenue_estimate = revenue_estimate.T
 
-        print()
-        print("**** Earnings History ****")
-        # print(get_analyst['Earnings History'])
+    # Modify the header
+    revenue_estimate.columns = revenue_estimate.iloc[0]
+    revenue_estimate = revenue_estimate[1:]
 
-        column_list = get_analyst['Earnings History'].columns.tolist()
+    # Reset the index
+    revenue_estimate = revenue_estimate.reset_index()
+    revenue_estimate = revenue_estimate.rename(columns={'index': 'Date'})
+    # print(df)
 
-        earnings_history = pd.DataFrame(data)
+    # Reorder the rows
+    revenue_estimate = revenue_estimate[['Date', 'Avg. Estimate', 'Low Estimate', 'High Estimate']]
+    revenue_estimate['Date'] = revenue_estimate['Date'].str.extract(r'\((.*?)\)')
+    # Display the formatted DataFrame
+    print(revenue_estimate)
 
-        # update the stock to stock ID later
-        earnings_history = earnings_history.append({
-            'stock_id': stock,
-            'data_type': 'estimated',
-            'four_back': get_analyst['Earnings History'][column_list[1]][0],
-            'four_date': column_list[1],
-            'three_back': get_analyst['Earnings History'][column_list[2]][0],
-            'three_date': column_list[2],
-            'two_back': get_analyst['Earnings History'][column_list[3]][0],
-            'two_date': column_list[3],
-            'one_back': get_analyst['Earnings History'][column_list[4]][0],
-            'one_date': column_list[4]
-        }, ignore_index=True)
-
-        earnings_history = earnings_history.append({
-            'stock_id': stock,
-            'data_type': 'actual',
-            'four_back': get_analyst['Earnings History'][column_list[1]][1],
-            'four_date': column_list[1],
-            'three_back': get_analyst['Earnings History'][column_list[2]][1],
-            'three_date': column_list[2],
-            'two_back': get_analyst['Earnings History'][column_list[3]][1],
-            'two_date': column_list[3],
-            'one_back': get_analyst['Earnings History'][column_list[4]][1],
-            'one_date': column_list[4]
-        }, ignore_index=True)
-
-        earnings_history = earnings_history.append({
-            'stock_id': stock,
-            'data_type': 'difference',
-            'four_back': get_analyst['Earnings History'][column_list[1]][2],
-            'four_date': column_list[1],
-            'three_back': get_analyst['Earnings History'][column_list[2]][2],
-            'three_date': column_list[2],
-            'two_back': get_analyst['Earnings History'][column_list[3]][2],
-            'two_date': column_list[3],
-            'one_back': get_analyst['Earnings History'][column_list[4]][2],
-            'one_date': column_list[4]
-        }, ignore_index=True)
-
-        print(earnings_history)
-        print()
-
-        return earnings_estimate, revenue_estimate, earnings_history
+    return earnings_estimate, revenue_estimate, earnings_history
 
 
 # pull once a day, 8pm est
@@ -614,7 +498,7 @@ def pull_daily():
                       puts['implied_volatility'][i])
             cursor.execute(sql_insert_options, params)
 
-        earnings_estimate, revenue_estimate, earnings_history = pull_analyst()
+        earnings_estimate, revenue_estimate, earnings_history = pull_analyst(stock)
         print(earnings_estimate)
         print(revenue_estimate)
         print(earnings_history)
@@ -623,17 +507,29 @@ def pull_daily():
         revenue_estimate['stock_id'] = stock_id[0]
         earnings_history['stock_id'] = stock_id[0]
 
+        count = 0
         for i in range(len(earnings_estimate)):
-            params = (earnings_estimate['stock_id'][i], earnings_estimate['data_type'][i], earnings_estimate['current_qtr'][i], earnings_estimate['current_qtr_name'][i], earnings_estimate['next_qtr'][i], earnings_estimate['next_qtr_name'][i], earnings_estimate['current_year'][i], earnings_estimate['current_year_name'][i], earnings_estimate['next_year'][i], earnings_estimate['next_year_name'][i])
+            params = (str(earnings_estimate['stock_id'][i]), count,
+                      earnings_estimate['Date'][i], earnings_estimate['Avg. Estimate'][i],
+                      earnings_estimate['Low Estimate'][i], earnings_estimate['High Estimate'][i])
             cursor.execute(sql_insert_earnings_estimate, params)
+            count += 1
 
+        count = 0
         for i in range(len(revenue_estimate)):
-            params = (revenue_estimate['stock_id'][i], revenue_estimate['data_type'][i], revenue_estimate['current_qtr'][i], revenue_estimate['current_qtr_name'][i], revenue_estimate['next_qtr'][i], revenue_estimate['next_qtr_name'][i], revenue_estimate['current_year'][i], revenue_estimate['current_year_name'][i], revenue_estimate['next_year'][i], revenue_estimate['next_year_name'][i])
+            params = (str(revenue_estimate['stock_id'][i]), count,
+                      revenue_estimate['Date'][i], revenue_estimate['Avg. Estimate'][i],
+                      revenue_estimate['Low Estimate'][i], revenue_estimate['High Estimate'][i])
             cursor.execute(sql_insert_revenue_estimate, params)
+            count += 1
 
+        count = 0
         for i in range(len(earnings_history)):
-            params = (earnings_history['stock_id'][i], earnings_history['data_type'][i], earnings_history['four_back'][i], earnings_history['four_date'][i], earnings_history['three_back'][i], earnings_history['three_date'][i], earnings_history['two_back'][i], earnings_history['two_date'][i], earnings_history['one_back'][i], earnings_history['one_date'][i])
+            params = (str(earnings_history['stock_id'][i]), count,
+                      earnings_history['Date'][i], earnings_history['EPS Est.'][i],
+                      earnings_history['EPS Actual'][i], earnings_history['Difference'][i])
             cursor.execute(sql_insert_earnings_history, params)
+            count += 1
 
     # put all into database
     print("Daily pull done")
@@ -765,35 +661,35 @@ def pull_all(cursor):
                       puts['implied_volatility'][i])
             cursor.execute(sql_insert_options, params)
 
-        earnings_estimate, revenue_estimate, earnings_history = pull_analyst()
+        earnings_estimate, revenue_estimate, earnings_history = pull_analyst(stock)
 
         earnings_estimate['stock_id'] = stock_id[0]
         revenue_estimate['stock_id'] = stock_id[0]
         earnings_history['stock_id'] = stock_id[0]
 
+        count = 0
         for i in range(len(earnings_estimate)):
-            params = (str(earnings_estimate['stock_id'][i]), earnings_estimate['data_type'][i],
-                      earnings_estimate['current_qtr'][i], earnings_estimate['current_qtr_name'][i],
-                      earnings_estimate['next_qtr'][i], earnings_estimate['next_qtr_name'][i],
-                      earnings_estimate['current_year'][i], earnings_estimate['current_year_name'][i],
-                      earnings_estimate['next_year'][i], earnings_estimate['next_year_name'][i])
+            params = (str(earnings_estimate['stock_id'][i]), count,
+                      earnings_estimate['Date'][i], earnings_estimate['Avg. Estimate'][i],
+                      earnings_estimate['Low Estimate'][i], earnings_estimate['High Estimate'][i])
             cursor.execute(sql_insert_earnings_estimate, params)
+            count += 1
 
+        count = 0
         for i in range(len(revenue_estimate)):
-            params = (str(revenue_estimate['stock_id'][i]), revenue_estimate['data_type'][i],
-                      revenue_estimate['current_qtr'][i], revenue_estimate['current_qtr_name'][i],
-                      revenue_estimate['next_qtr'][i], revenue_estimate['next_qtr_name'][i],
-                      revenue_estimate['current_year'][i], revenue_estimate['current_year_name'][i],
-                      revenue_estimate['next_year'][i], revenue_estimate['next_year_name'][i])
+            params = (str(revenue_estimate['stock_id'][i]), count,
+                      revenue_estimate['Date'][i], revenue_estimate['Avg. Estimate'][i],
+                      revenue_estimate['Low Estimate'][i], revenue_estimate['High Estimate'][i])
             cursor.execute(sql_insert_revenue_estimate, params)
+            count += 1
 
+        count = 0
         for i in range(len(earnings_history)):
-            params = (str(earnings_history['stock_id'][i]), earnings_history['data_type'][i],
-                      earnings_history['four_back'][i], earnings_history['four_date'][i],
-                      earnings_history['three_back'][i], earnings_history['three_date'][i],
-                      earnings_history['two_back'][i], earnings_history['two_date'][i],
-                      earnings_history['one_back'][i], earnings_history['one_date'][i])
+            params = (str(earnings_history['stock_id'][i]), count,
+                      earnings_history['Date'][i], earnings_history['EPS Est.'][i],
+                      earnings_history['EPS Actual'][i], earnings_history['Difference'][i])
             cursor.execute(sql_insert_earnings_history, params)
+            count += 1
 
     return
 # endregion
