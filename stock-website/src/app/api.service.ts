@@ -53,42 +53,24 @@ export interface IOption {
 }
 
 export interface IEarningsEstimate {
-  current_qtr: string;
-  current_qtr_name: string;
-  current_year: string;
-  current_year_name: string;
-  data_type: string;
-  next_qtr: string;
-  next_qtr_name: string;
-  next_year: string;
-  next_year_name: string;
-  stock_id: number;
+  date: string;
+  average: string;
+  low: string;
+  high: string;
 }
 
 export interface IEarningsHistory {
-  data_type: string;
-  four_back: string;
-  four_date: string;
-  one_back: string;
-  one_date: string;
-  stock_id: number;
-  three_back: string;
-  three_date: string;
-  two_back: string;
-  two_date: string;
+  year: string;
+  average: string;
+  actual: string;
+  difference: string;
 }
 
 export interface IRevenueEstimate {
-  current_qtr: string;
-  current_qtr_name: string;
-  current_year: string;
-  current_year_name: string;
-  data_type: string;
-  next_qtr: string;
-  next_qtr_name: string;
-  next_year: string;
-  next_year_name: string;
-  stock_id: number;
+  date: string;
+  average: string;
+  low: string;
+  high: string;
 }
 
 

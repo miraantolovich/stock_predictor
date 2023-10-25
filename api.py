@@ -185,15 +185,10 @@ def get_earningsestimate_id(stock_id):
         for row in result:
             data.append({
                 'stock_id': row.stock_id,
-                'data_type': row.data_type,
-                'current_qtr': row.current_qtr,
-                'current_qtr_name': row.current_qtr_name,
-                'next_qtr': row.next_qtr,
-                'next_qtr_name': row.next_qtr_name,
-                'current_year': row.current_year,
-                'current_year_name': row.current_year_name,
-                'next_year': row.next_year,
-                'next_year_name': row.next_year_name
+                'date': row.date,
+                'average': row.average,
+                'low': row.low,
+                'high': row.high
             })
 
         cursor.close()
@@ -221,15 +216,10 @@ def get_earningshistory_id(stock_id):
         for row in result:
             data.append({
                 'stock_id': row.stock_id,
-                'data_type': row.data_type,
-                'four_back': row.four_back,
-                'four_date': row.four_date,
-                'three_back': row.three_back,
-                'three_date': row.three_date,
-                'two_back': row.two_back,
-                'two_date': row.two_date,
-                'one_back': row.one_back,
-                'one_date': row.one_date
+                'year': row.year,
+                'average': row.average,
+                'actual': row.actual,
+                'difference': row.difference
             })
 
         cursor.close()
@@ -257,15 +247,10 @@ def get_revenueestimate_id(stock_id):
         for row in result:
             data.append({
                 'stock_id': row.stock_id,
-                'data_type': row.data_type,
-                'current_qtr': row.current_qtr,
-                'current_qtr_name': row.current_qtr_name,
-                'next_qtr': row.next_qtr,
-                'next_qtr_name': row.next_qtr_name,
-                'current_year': row.current_year,
-                'current_year_name': row.current_year_name,
-                'next_year': row.next_year,
-                'next_year_name': row.next_year_name
+                'date': row.date,
+                'average': row.average,
+                'low': row.low,
+                'high': row.high
             })
 
         cursor.close()

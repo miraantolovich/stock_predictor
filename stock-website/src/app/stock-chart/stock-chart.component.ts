@@ -1,5 +1,5 @@
 // #region Setup
-import { Component, ViewChild } from "@angular/core";
+import { Component, ViewChild, OnInit } from "@angular/core";
 import { ReactiveFormsModule } from '@angular/forms';
 import { ApiService } from '../api.service';
 import { DatePipe } from '@angular/common';
@@ -41,7 +41,7 @@ export type ChartOptions = {
 })
 //#endregion
 
-export class StockChartComponent {
+export class StockChartComponent implements OnInit {
   // #region Variables
   @ViewChild("chart", { static: false }) chart: ChartComponent;
 
@@ -64,26 +64,24 @@ export class StockChartComponent {
   protected volume_data = [10000, 41000, 35000, 51000, 49000, 62000, 69000, 91000, 148000];
   protected roc_data = [1, 2, 3, 0, -3, -2, -4, 1, 0]
   
-  protected additional_details = {    
-    earningsEstimate: [
-    { date: 'Jun 2023', avg_estimate: '1.19', low_estimate: '1.14', high_estimate: '1.45' },
-    { date: 'Sep 2023', avg_estimate: '1.36', low_estimate: '1.17', high_estimate: '1.45'  },
-    { date: '2023', avg_estimate: '5.97', low_estimate: '5.43', high_estimate: '1.45'  },
-    { date: '2024', avg_estimate: '6.54', low_estimate: '5.58', high_estimate: '1.45'  },
-    ],
-    revenueEstimate: [
-      { date: 'Jun 2023', avg_estimate: '81.67B', low_estimate: '81.67B', high_estimate: '81.67B'  },
-      { date: 'Sep 2023', avg_estimate: '90.52B', low_estimate: '81.67B', high_estimate: '81.67B'  },
-      { date: '2023', avg_estimate: '384.51B', low_estimate: '81.67B', high_estimate: '81.67B'  },
-      { date: '2024', avg_estimate: '409.11B', low_estimate: '81.67B', high_estimate: '81.67B'  },
-    ],
-    earningsHistory: [
-      { date: '6/29/2022', avg_estimate: '1.16', eps_actual: '1.2', difference: '0.04'  },
-      { date: '9/29/2022', avg_estimate: '1.16', eps_actual: '1.2', difference: '0.04'  },
-      { date: '12/30/2022', avg_estimate: '1.16', eps_actual: '1.2', difference: '0.04'  },
-      { date: '3/30/2023', avg_estimate: '1.16', eps_actual: '1.2', difference: '0.04'  },
-    ]
-  }
+  protected earningsEstimate = [
+    { date: 'Jun 2023', average: '1.19', low: '1.14', high: '1.45' },
+    { date: 'Sep 2023', average: '1.36', low: '1.17', high: '1.45'  },
+    { date: '2023', average: '5.97', low: '5.43', high: '1.45'  },
+    { date: '2024', average: '6.54', low: '5.58', high: '1.45'  },
+  ]
+  protected revenueEstimate = [
+      { date: 'Jun 2023', average: '81.67B', low: '81.67B', high: '81.67B'  },
+      { date: 'Sep 2023', average: '90.52B', low: '81.67B', high: '81.67B'  },
+      { date: '2023', average: '384.51B', low: '81.67B', high: '81.67B'  },
+      { date: '2024', average: '409.11B', low: '81.67B', high: '81.67B'  },
+  ]
+  protected earningsHistory = [
+      { year: '6/29/2022', average: '1.16', actual: '1.2', difference: '0.04'  },
+      { year: '9/29/2022', average: '1.16', actual: '1.2', difference: '0.04'  },
+      { year: '12/30/2022', average: '1.16', actual: '1.2', difference: '0.04'  },
+      { year: '3/30/2023', average: '1.16', actual: '1.2', difference: '0.04'  },
+  ]
 
   protected options_dates = ["May", "June", "July"];
   protected selectedOptionsDate = this.options_dates[0];
@@ -177,9 +175,19 @@ export class StockChartComponent {
   protected smaColor = "#80A4ED"
   protected emaColor = "#88527F"
   protected bbColor = "#FAC748"
+
+  protected dataLoaded = false
   // #endregion
 
-  constructor(private apiService: ApiService) {
+  constructor(private apiService: ApiService) { }
+
+  ngOnInit(): void {
+    this.loadDataAndWait();
+  }
+
+  loadDataAndWait(): void {
+    let dataIsLoaded = false;
+
     // Fetch your data from the API when the component initializes
     this.apiService.getStocks().subscribe(data => {
       // Process the data and set it to your component properties
@@ -188,24 +196,24 @@ export class StockChartComponent {
       console.log(this.stockTypes)
       this.selectedStockType = this.stockTypes[0]
     });
-
+    
     let index = this.stockTypes.indexOf(this.selectedStockType);
     const datePipe = new DatePipe('en-US');
     console.log(index);
-    
+        
     this.apiService.getPrice((index + 1).toString()).subscribe(data => {
       this.stock_data = data.map(price => ({
         x: datePipe.transform(new Date(price.date), 'yyyy-MM-dd') || '',
         y: parseFloat(price.adjusted_close_price)
       }));
-
+    
       this.x_axis_data = data.map(price => datePipe.transform(new Date(price.date), 'yyyy-MM-dd') || '');
       this.volume_data = data.map(volume => volume.volume)
-
+    
       console.log(this.stock_data);
       console.log(this.x_axis_data)
     });
-
+    
     this.apiService.getOption((index + 1).toString()).subscribe(data => {
 
       function convertToDateSimplified(dateString: string) {
@@ -240,10 +248,52 @@ export class StockChartComponent {
 
     });
 
-    this.initCharts();
+    this.apiService.getEarningsEstimate((index + 1).toString()).subscribe(data => {
+      this.earningsEstimate = data.map(earnings => ({
+        date: earnings.date,
+        average: earnings.average,
+        low: earnings.low,
+        high: earnings.high
+      }));
+    
+      console.log(this.earningsEstimate);
+    });
+
+    this.apiService.getRevenueEstimate((index + 1).toString()).subscribe(data => {
+      this.revenueEstimate = data.map(earnings => ({
+        date: earnings.date,
+        average: earnings.average,
+        low: earnings.low,
+        high: earnings.high
+      }));
+    
+      console.log(this.revenueEstimate);
+    });
+
+    this.apiService.getEarningsHistory((index + 1).toString()).subscribe(data => {
+      this.earningsHistory = data.map(earnings => ({
+        year: earnings.year,
+        average: earnings.average,
+        actual: earnings.actual,
+        difference: earnings.difference
+      }));
+    
+      console.log(this.earningsHistory);
+
+    });
+
+    dataIsLoaded = true
+
+    const checkDataInterval = setInterval(() => {
+      if (dataIsLoaded) {
+        clearInterval(checkDataInterval); // Stop the loop
+        this.dataLoaded = true; // Set the dataLoaded flag
+        this.initCharts(); // Initialize charts or other actions
+      }
+    }, 1000); // Check every 1 second
   }
 
-  private initCharts(): void {
+  protected initCharts(): void {
     this.commonOptions = {
     };
 
@@ -284,7 +334,6 @@ export class StockChartComponent {
           data: this.volume_data,
         }
       ],
-      colors: [this.stockColor],
       chart: {
         toolbar: {
           show: false,
@@ -347,6 +396,7 @@ export class StockChartComponent {
     const datePipe = new DatePipe('en-US');
     console.log(index);
     
+    console.log("new stock")
     this.apiService.getPrice((index + 1).toString()).subscribe(data => {
       this.stock_data = data.map(price => ({
         x: datePipe.transform(new Date(price.date), 'yyyy-MM-dd') || '',
@@ -373,21 +423,36 @@ export class StockChartComponent {
     })
     all_colors.push(this.stockColor);
 
+    let bbData = [{x: "Jan", y: [4, 5]}]
+    let smaData = [{x: "Jan", y: 10}]
+    let emaData = [{x: "Jan", y: 10}]
+    this.apiService.getIndicator((index + 1).toString()).subscribe(data => {
+      bbData = data.map(indicator => ({
+        x: datePipe.transform(new Date(indicator.date), 'yyyy-MM-dd') || '',
+        y: [indicator.bb_lower, indicator.bb_upper].map(val => val || 0)
+      }));
+
+      smaData = data.map(indicator => ({
+        x: datePipe.transform(new Date(indicator.date), 'yyyy-MM-dd') || '',
+        y: indicator.sma || 0
+      }));
+
+      emaData = data.map(indicator => ({
+        x: datePipe.transform(new Date(indicator.date), 'yyyy-MM-dd') || '',
+        y: indicator.ema || 0
+      }));
+
+      console.log(bbData)
+      console.log(smaData)
+      console.log(emaData)
+    });
+
+
     if (this.showBB) {
       data_line.push({   
           type: "rangeArea",
           name: "BB",
-          data: [
-            {x: "Jan", y: [4, 5]},
-            {x: "Feb", y: [20, 25]},
-            {x: "Mar", y: [3, 10]},
-            {x: "Apr", y: [8, 16]},
-            {x: "May", y: [13, 22]},
-            {x: "Jun", y: [18, 26]},
-            {x: "Jul", y: [21, 29]},
-            {x: "Aug", y: [21, 28]},
-            {x: "Sep", y: [17, 24]}
-          ]
+          data: bbData
       })
       all_colors.push(this.bbColor);
     }
@@ -396,8 +461,7 @@ export class StockChartComponent {
     if (this.showSMA) {
       data_line.push({
         name: "SMA",
-        data: [{x: "Jan", y: 10}, {x: "Feb", y: 30}, {x: "Mar", y: 20}, {x: "Apr", y: 30}, 
-               {x: "May", y: 20}, {x: "Jun", y: 45}, {x: "Jul", y: 68}, {x: "Aug", y: 57}, {x: "Sep", y: 78}],
+        data: smaData,
         type: "line"
       })
       all_colors.push(this.smaColor);
@@ -406,8 +470,7 @@ export class StockChartComponent {
     if (this.showEMA) {
       data_line.push({
         name: "EMA",
-        data: [{x: "Jan", y: 10}, {x: "Feb", y: 25.8333}, {x: "Mar", y: 23.8889}, {x: "Apr", y: 32.5185}, 
-               {x: "May", y: 37.0123}, {x: "Jun", y: 45.3372}, {x: "Jul", y: 52.1124}, {x: "Aug", y: 70.7408}, {x: "Sep", y: 104.4939}],
+        data: emaData,
         type: "line"
       })
       all_colors.push(this.emaColor);
