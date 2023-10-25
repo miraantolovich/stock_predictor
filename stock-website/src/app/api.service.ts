@@ -37,6 +37,43 @@ export interface IIndicator {
   stock_id: number;
 }
 
+export interface IBB {
+  date: string;
+  bb_lower: number;
+  bb_upper: number;
+}
+
+export interface ISma {
+  date: string;
+  sma: number;
+}
+
+export interface IEma {
+  date: string;
+  ema: number;
+}
+
+export interface IRPercent {
+  date: string;
+  r_percent: number;
+}
+
+export interface IRoc {
+  date: string;
+  roc: number;
+}
+
+export interface ISI {
+  date: string;
+  si_k: number;
+  si_d: number;
+}
+
+export interface IRsi {
+  date: string;
+  rsi: number;
+}
+
 export interface IOption {
   ask: string;
   bid: string;

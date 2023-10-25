@@ -23,6 +23,15 @@ sql_select_stock = "EXEC [Stock_Information].[dbo].[SelectStock]"
 sql_select_price = "EXEC [Stock_Information].[dbo].[SelectPriceID] ?"
 sql_select_indicator = "EXEC [Stock_Information].[dbo].[SelectIndicatorID] ?"
 sql_select_option = "EXEC [Stock_Information].[dbo].[SelectOptionID] ?"
+
+sql_select_bb = "EXEC [Stock_Information].[dbo].[SelectBBID] ?"
+sql_select_sma = "EXEC [Stock_Information].[dbo].[SelectSmaID] ?"
+sql_select_ema = "EXEC [Stock_Information].[dbo].[SelectEmaID] ?"
+sql_select_roc = "EXEC [Stock_Information].[dbo].[SelectROCID] ?"
+sql_select_rpercent = "EXEC [Stock_Information].[dbo].[SelectRPercentID] ?"
+sql_select_si = "EXEC [Stock_Information].[dbo].[SelectSIID] ?"
+sql_select_rsi = "EXEC [Stock_Information].[dbo].[SelectRsiID] ?"
+
 sql_select_earningsestimate = "EXEC [Stock_Information].[dbo].[SelectEarningsEstimateID] ?"
 sql_select_earningshistory = "EXEC [Stock_Information].[dbo].[SelectEarningsHistoryID] ?"
 sql_select_revenueestimate = "EXEC [Stock_Information].[dbo].[SelectRevenueEstimateID] ?"
@@ -129,6 +138,206 @@ def get_indicator_id(stock_id):
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/indicator/bb/<stock_id>', methods=['GET'])
+def get_bb_id(stock_id):
+    try:
+        connection_string = f"DRIVER={{{driver}}};SERVER={server};DATABASE={database};Trusted_Connection=yes"
+
+        conn = pyodbc.connect(connection_string)
+        cursor = conn.cursor()
+
+        cursor.execute(sql_select_bb, stock_id)
+        result = cursor.fetchall()
+
+        # Fetch all rows as a list of dictionaries
+        data = []
+        for row in result:
+            data.append({
+                'stock_id': row.stock_id,
+                'date': row.date,
+                'bb_lower': row.bb_lower,
+                'bb_upper': row.bb_upper,
+            })
+
+        cursor.close()
+        conn.close()
+
+        return jsonify(data)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/indicator/sma/<stock_id>', methods=['GET'])
+def get_sma_id(stock_id):
+    try:
+        connection_string = f"DRIVER={{{driver}}};SERVER={server};DATABASE={database};Trusted_Connection=yes"
+
+        conn = pyodbc.connect(connection_string)
+        cursor = conn.cursor()
+
+        cursor.execute(sql_select_sma, stock_id)
+        result = cursor.fetchall()
+
+        # Fetch all rows as a list of dictionaries
+        data = []
+        for row in result:
+            data.append({
+                'stock_id': row.stock_id,
+                'date': row.date,
+                'sma': row.sma
+            })
+
+        cursor.close()
+        conn.close()
+
+        return jsonify(data)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/indicator/ema/<stock_id>', methods=['GET'])
+def get_ema_id(stock_id):
+    try:
+        connection_string = f"DRIVER={{{driver}}};SERVER={server};DATABASE={database};Trusted_Connection=yes"
+
+        conn = pyodbc.connect(connection_string)
+        cursor = conn.cursor()
+
+        cursor.execute(sql_select_ema, stock_id)
+        result = cursor.fetchall()
+
+        # Fetch all rows as a list of dictionaries
+        data = []
+        for row in result:
+            data.append({
+                'stock_id': row.stock_id,
+                'date': row.date,
+                'ema': row.sma
+            })
+
+        cursor.close()
+        conn.close()
+
+        return jsonify(data)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/indicator/roc/<stock_id>', methods=['GET'])
+def get_roc_id(stock_id):
+    try:
+        connection_string = f"DRIVER={{{driver}}};SERVER={server};DATABASE={database};Trusted_Connection=yes"
+
+        conn = pyodbc.connect(connection_string)
+        cursor = conn.cursor()
+
+        cursor.execute(sql_select_roc, stock_id)
+        result = cursor.fetchall()
+
+        # Fetch all rows as a list of dictionaries
+        data = []
+        for row in result:
+            data.append({
+                'stock_id': row.stock_id,
+                'date': row.date,
+                'roc': row.roc
+            })
+
+        cursor.close()
+        conn.close()
+
+        return jsonify(data)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/indicator/rpercent/<stock_id>', methods=['GET'])
+def get_rpercent_id(stock_id):
+    try:
+        connection_string = f"DRIVER={{{driver}}};SERVER={server};DATABASE={database};Trusted_Connection=yes"
+
+        conn = pyodbc.connect(connection_string)
+        cursor = conn.cursor()
+
+        cursor.execute(sql_select_rpercent, stock_id)
+        result = cursor.fetchall()
+
+        # Fetch all rows as a list of dictionaries
+        data = []
+        for row in result:
+            data.append({
+                'stock_id': row.stock_id,
+                'date': row.date,
+                'r_percent': row.r_percent
+            })
+
+        cursor.close()
+        conn.close()
+
+        return jsonify(data)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/indicator/si/<stock_id>', methods=['GET'])
+def get_si_id(stock_id):
+    try:
+        connection_string = f"DRIVER={{{driver}}};SERVER={server};DATABASE={database};Trusted_Connection=yes"
+
+        conn = pyodbc.connect(connection_string)
+        cursor = conn.cursor()
+
+        cursor.execute(sql_select_si, stock_id)
+        result = cursor.fetchall()
+
+        # Fetch all rows as a list of dictionaries
+        data = []
+        for row in result:
+            data.append({
+                'stock_id': row.stock_id,
+                'date': row.date,
+                'si_k': row.si_k,
+                'si_d': row.si_d
+            })
+
+        cursor.close()
+        conn.close()
+
+        return jsonify(data)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/indicator/rsi/<stock_id>', methods=['GET'])
+def get_rpercent_id(stock_id):
+    try:
+        connection_string = f"DRIVER={{{driver}}};SERVER={server};DATABASE={database};Trusted_Connection=yes"
+
+        conn = pyodbc.connect(connection_string)
+        cursor = conn.cursor()
+
+        cursor.execute(sql_select_rsi, stock_id)
+        result = cursor.fetchall()
+
+        # Fetch all rows as a list of dictionaries
+        data = []
+        for row in result:
+            data.append({
+                'stock_id': row.stock_id,
+                'date': row.date,
+                'rsi': row.rsi
+            })
+
+        cursor.close()
+        conn.close()
+
+        return jsonify(data)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 
 @app.route('/api/option/<stock_id>', methods=['GET'])
