@@ -20,16 +20,19 @@ def calculate_sma(data, days=50):
     sma = data.rolling(window=days).mean()
     sma_dataframe = pd.DataFrame(sma)
     sma_dataframe = sma_dataframe.rename(columns={'adjusted_close_price': 'sma'})
+    # print("SMA")
+    # print(sma)
     return sma_dataframe
 
 
 # data will be the last ? days/? days depending
 def calculate_ema(data, smooth=0.2, days=26):
-    ema = data.ewm(com=smooth).mean()
-
+    multiplier = 2 / (days + 1)
+    ema = data.ewm(alpha=multiplier, adjust=True).mean()
     ema_dataframe = pd.DataFrame(ema)
     ema_dataframe = ema_dataframe.rename(columns={'adjusted_close_price': 'ema'})
-
+    # print("EMA")
+    # print(ema)
     return ema_dataframe
 
 

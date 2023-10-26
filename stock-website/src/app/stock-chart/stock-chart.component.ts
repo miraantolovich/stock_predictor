@@ -56,13 +56,16 @@ export class StockChartComponent implements OnInit {
   protected selectedGraphType = this.graphTypes[0];
   protected selectedStockType = this.stockTypes[0];
 
-  protected stock_data = [{x: "Jan", y: 10}, {x: "Feb", y: 41}, {x: "Mar", y: 35}, {x: "Apr", y: 51}, {x: "May", y: 49}, {x: "Jun", y: 62}, 
-                          {x: "Jul", y: 69}, {x: "Aug", y: 91}, {x: "Sep", y: 148}];
-
+  protected stock_data = [{x: "Jan", y: 10}];
+  protected candle_data = [{x: "Jan", y: [10, 1, 1, 1]}];
   protected x_axis_data = ["Jan", "Feb",  "Mar",  "Apr",  "May",  "Jun",  "Jul",  "Aug", "Sep"]
   
   protected volume_data = [10000, 41000, 35000, 51000, 49000, 62000, 69000, 91000, 148000];
+
   protected roc_data = [1, 2, 3, 0, -3, -2, -4, 1, 0]
+  protected bbData = [{x: "Jan", y: [10, 12]}]
+  protected smaData = [{x: "Jan", y: 10}]
+  protected emaData = [{x: "Jan", y: 10}]
   
   protected earningsEstimate = [
     { date: 'Jun 2023', average: '1.19', low: '1.14', high: '1.45' },
@@ -405,15 +408,9 @@ export class StockChartComponent implements OnInit {
 
       this.x_axis_data = data.map(price => datePipe.transform(new Date(price.date), 'yyyy-MM-dd') || '');
 
-      this.volume_data = data.map(volume => volume.volume);
 
       console.log(this.stock_data);
       console.log(this.x_axis_data);
-      console.log(this.volume_data);
-    });
-
-    this.apiService.getIndicator((index + 1).toString()).subscribe(data => {
-
     });
     
     console.log("line")
@@ -423,57 +420,63 @@ export class StockChartComponent implements OnInit {
     })
     all_colors.push(this.stockColor);
 
-    let bbData = [{x: "Jan", y: [4, 5]}]
-    let smaData = [{x: "Jan", y: 10}]
-    let emaData = [{x: "Jan", y: 10}]
-    this.apiService.getIndicator((index + 1).toString()).subscribe(data => {
-      bbData = data.map(indicator => ({
-        x: datePipe.transform(new Date(indicator.date), 'yyyy-MM-dd') || '',
-        y: [indicator.bb_lower, indicator.bb_upper].map(val => val || 0)
-      }));
-
-      smaData = data.map(indicator => ({
-        x: datePipe.transform(new Date(indicator.date), 'yyyy-MM-dd') || '',
-        y: indicator.sma || 0
-      }));
-
-      emaData = data.map(indicator => ({
-        x: datePipe.transform(new Date(indicator.date), 'yyyy-MM-dd') || '',
-        y: indicator.ema || 0
-      }));
-
-      console.log(bbData)
-      console.log(smaData)
-      console.log(emaData)
-    });
-
-
     if (this.showBB) {
-      data_line.push({   
+
+      this.apiService.getBB((index + 1).toString()).subscribe(data => {
+        this.bbData = data.map(row => ({
+          x: datePipe.transform(new Date(row.date), 'yyyy-MM-dd') || '',
+          y: [row.bb_lower, row.bb_upper]
+        }));
+
+        console.log(this.bbData);
+
+        data_line.push({   
           type: "rangeArea",
           name: "BB",
-          data: bbData
-      })
-      all_colors.push(this.bbColor);
+          data: this.bbData
+        })
+        all_colors.push(this.bbColor);
+      });
+
     }
 
     // get options 
     if (this.showSMA) {
-      data_line.push({
-        name: "SMA",
-        data: smaData,
-        type: "line"
-      })
-      all_colors.push(this.smaColor);
+
+      this.apiService.getSma((index + 1).toString()).subscribe(data => {
+        this.smaData = data.map(row => ({
+          x: datePipe.transform(new Date(row.date), 'yyyy-MM-dd') || '',
+          y: row.sma
+        }));
+
+        console.log(this.smaData);
+
+        data_line.push({
+          name: "SMA",
+          data: this.smaData,
+          type: "line"
+        })
+        all_colors.push(this.smaColor);
+      });
     }
 
     if (this.showEMA) {
-      data_line.push({
-        name: "EMA",
-        data: emaData,
-        type: "line"
-      })
-      all_colors.push(this.emaColor);
+
+      this.apiService.getEma((index + 1).toString()).subscribe(data => {
+        this.emaData = data.map(row => ({
+          x: datePipe.transform(new Date(row.date), 'yyyy-MM-dd') || '',
+          y: row.ema
+        }));
+
+        console.log(this.emaData);
+
+        data_line.push({
+          name: "EMA",
+          data: this.emaData,
+          type: "line"
+        })
+        all_colors.push(this.emaColor);
+      });
     }
 
     // BB can be rangeArea (change chart to rangeArea, y axis tooltip enabled false)
@@ -541,50 +544,62 @@ export class StockChartComponent implements OnInit {
   }
 
   private ifCandle() {
-    var data_candle = []
     // get stock data open, high, low, close
     console.log("candle")
-    data_candle.push({
-      type: "candlestick",
-      data: [
-        {x: "Jan", y: [4, 5, 3, 4]},
-        {x: "Feb", y: [20, 25, 10, 14]},
-        {x: "Mar", y: [3, 10, 4, 5]},
-        {x: "Apr", y: [8, 16, 6, 10]},
-        {x: "May", y: [13, 22, 14, 20]},
-        {x: "Jun", y: [18, 26, 19, 21]},
-        {x: "Jul", y: [21, 29, 21, 24]},
-        {x: "Aug", y: [21, 28, 18, 18]},
-        {x: "Sep", y: [17, 24, 19, 23]}
-      ],
-      name: this.selectedStockType
-    })
+
+    // get stock data just close
+    let index = this.stockTypes.indexOf(this.selectedStockType);
+    const datePipe = new DatePipe('en-US');
+    console.log(index);
+    
+    console.log("new stock")
+    this.apiService.getPrice((index + 1).toString()).subscribe(data => {
+      this.candle_data = data.map(price => ({
+        x: datePipe.transform(new Date(price.date), 'yyyy-MM-dd') || '',
+        y: [parseFloat(price.open_price), parseFloat(price.high_price), parseFloat(price.low_price), parseFloat(price.close_price)]
+      }));
+      
+      var data_candle = []
+
+      this.x_axis_data = data.map(price => datePipe.transform(new Date(price.date), 'yyyy-MM-dd') || '');
+
+      console.log(this.candle_data);
+      console.log(this.x_axis_data);
+
+      data_candle.push({
+        type: "candlestick",
+        data: this.candle_data,
+        name: this.selectedStockType
+      })  
 
     // Chart has to be candlestick (change chart to candlestick)
     // y axis tooltip enabled (true)
-    this.chart1Options = {
-      series: data_candle,
-      chart: {
-        height: 450,
-        id: "main",
-        type: "candlestick",
-        group: "stock"
-      },
-      xaxis: {
-        categories: this.x_axis_data
-      },
-      yaxis: {
-        forceNiceScale: true,
-        labels: {
-          minWidth: 60,
-          maxWidth: 60
+
+      this.chart1Options = {
+        series: data_candle,
+        chart: {
+          height: 450,
+          id: "main",
+          type: "candlestick",
+          group: "stock"
+        },
+        xaxis: {
+          categories: this.x_axis_data
+        },
+        yaxis: {
+          forceNiceScale: true,
+          labels: {
+            minWidth: 60,
+            maxWidth: 60
+          }
+        },
+        stroke: {
+          curve: "straight",
+          width: [4, 4, 4, 4, 4, 4],
         }
-      },
-      stroke: {
-        curve: "straight",
-        width: [4, 4, 4, 4, 4, 4],
-      }
-    }; 
+      };   
+
+    });
   }
 
 

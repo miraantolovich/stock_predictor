@@ -214,7 +214,7 @@ def get_ema_id(stock_id):
             data.append({
                 'stock_id': row.stock_id,
                 'date': row.date,
-                'ema': row.sma
+                'ema': row.ema
             })
 
         cursor.close()
@@ -311,7 +311,7 @@ def get_si_id(stock_id):
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/indicator/rsi/<stock_id>', methods=['GET'])
-def get_rpercent_id(stock_id):
+def get_rsi_id(stock_id):
     try:
         connection_string = f"DRIVER={{{driver}}};SERVER={server};DATABASE={database};Trusted_Connection=yes"
 

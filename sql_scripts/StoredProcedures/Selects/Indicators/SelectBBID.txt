@@ -6,7 +6,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE PROCEDURE [dbo].[SelectBBID]
+ALTER PROCEDURE [dbo].[SelectBBID]
 	@param_stock_id varchar(5)
 AS
 BEGIN
@@ -17,10 +17,17 @@ BEGIN
 	DECLARE @stock_id AS INT;
 
 	SET @stock_id = TRY_CAST(REPLACE( @param_stock_id, ',', '') AS INT)
-
-    SELECT 
+	
+	SELECT 
 		stock_id, date,
 		bb_middle, bb_lower, bb_upper
-	FROM [Stock_Information].[dbo].[Indicators]
-    WHERE stock_id = @stock_id AND bb_middle IS NOT NULL
+	FROM (
+		SELECT TOP 252
+			stock_id, date,
+			bb_middle, bb_lower, bb_upper
+		FROM [Stock_Information].[dbo].[Indicators]
+		WHERE stock_id = @stock_id AND bb_middle IS NOT NULL
+		ORDER BY date DESC
+	) AS Subquery
+    ORDER BY date ASC;
 END

@@ -132,6 +132,36 @@ export class ApiService {
     return this.http.get<IIndicator[]>(`${this.apiBaseUrl}/indicator/${stockId}`);
   }
 
+
+  getBB(stockId: string) {
+    return this.http.get<IBB[]>(`${this.apiBaseUrl}/indicator/bb/${stockId}`);
+  }
+
+  getSma(stockId: string) {
+    return this.http.get<ISma[]>(`${this.apiBaseUrl}/indicator/sma/${stockId}`);
+  }
+
+  getEma(stockId: string) {
+    return this.http.get<IEma[]>(`${this.apiBaseUrl}/indicator/ema/${stockId}`);
+  }
+  
+  getRoc(stockId: string) {
+    return this.http.get<IRoc[]>(`${this.apiBaseUrl}/indicator/roc/${stockId}`);
+  }
+
+  getRPercent(stockId: string) {
+    return this.http.get<IRPercent[]>(`${this.apiBaseUrl}/indicator/rpercent/${stockId}`);
+  }
+
+  getSI(stockId: string) {
+    return this.http.get<ISI[]>(`${this.apiBaseUrl}/indicator/si/${stockId}`);
+  }
+
+  getRsi(stockId: string) {
+    return this.http.get<IRsi[]>(`${this.apiBaseUrl}/indicator/rsi/${stockId}`);
+  }
+
+
   getOption(stockId: string) {
     return this.http.get<IOption[]>(`${this.apiBaseUrl}/option/${stockId}`);
   }
