@@ -25,10 +25,10 @@ pd.set_option('display.max_columns', None)
 
 # get list of all stocks to compare
 # INTC (large), CWH (small-med), GBX (small), SOFI (medium), SUZ (medium), AAL (medium)
-stock_list = ["INTC"]
-# stock_list = ["INTC", "CWH", "GBX", "SOFI", "SUZ", "AAL"]
+# stock_list = ["INTC"]
+stock_list = ["INTC", "CWH", "GBX", "SOFI", "AAL"]
 stock_name = ["Intel Corporation", "Camping World Holdings", "The Greenbrier Companies", "SoFi Technologies",
-              "Suzano S.A.", "American Airlines Group"]
+              "American Airlines Group"]
 # endregion
 
 # region Set Up Database Connection
@@ -71,7 +71,7 @@ def initialize_stocks():
     conn.close()
 
 
-def pull_options(current_date):
+def pull_options(stock, current_date):
     data = {
         'stock_id': [],
         'date': [],
@@ -90,170 +90,164 @@ def pull_options(current_date):
     calls = pd.DataFrame(data)
     puts = pd.DataFrame(data)
 
-    for stock in stock_list:
-        get_dates = ops.get_expiration_dates(stock)
-        # print(get_dates)
+    get_dates = ops.get_expiration_dates(stock)
+    # print(get_dates)
 
-        for date in get_dates:
-            get_calls = ops.get_calls(stock, date)
-            #print(get_calls)
-            for index, row in get_calls.iterrows():
-                # print(row)
-                calls = calls.append({
-                    'stock_id': stock,
-                    'date': current_date,
-                    'expiration_date': date,
-                    'option_type': 'calls',
-                    'strike_price': row['Strike'],
-                    'bid': row['Bid'],
-                    'ask': row['Ask'],
-                    'change': row['Change'],
-                    'percent_change': row['% Change'],
-                    'volume': row['Volume'],
-                    'open_interest': row['Open Interest'],
-                    'implied_volatility': row['Implied Volatility']
-                }, ignore_index=True)
+    for date in get_dates:
+        get_calls = ops.get_calls(stock)
+        #print(get_calls)
+        for index, row in get_calls.iterrows():
+            # print(row)
+            calls = calls.append({
+                'stock_id': stock,
+                'date': current_date,
+                'expiration_date': date,
+                'option_type': 'calls',
+                'strike_price': row['Strike'],
+                'bid': row['Bid'],
+                'ask': row['Ask'],
+                'change': row['Change'],
+                'percent_change': row['% Change'],
+                'volume': row['Volume'],
+                'open_interest': row['Open Interest'],
+                'implied_volatility': row['Implied Volatility']
+            }, ignore_index=True)
 
-            get_puts = ops.get_puts(stock, date)
+        get_puts = ops.get_puts(stock)
 
-            for index, row in get_puts.iterrows():
-                # print(row)
-                puts = puts.append({
-                    'stock_id': stock,
-                    'date': current_date,
-                    'expiration_date': date,
-                    'option_type': 'puts',
-                    'strike_price': row['Strike'],
-                    'bid': row['Bid'],
-                    'ask': row['Ask'],
-                    'change': row['Change'],
-                    'percent_change': row['% Change'],
-                    'volume': row['Volume'],
-                    'open_interest': row['Open Interest'],
-                    'implied_volatility': row['Implied Volatility']
-                }, ignore_index=True)
+        for index, row in get_puts.iterrows():
+            # print(row)
+            puts = puts.append({
+                'stock_id': stock,
+                'date': current_date,
+                'expiration_date': date,
+                'option_type': 'puts',
+                'strike_price': row['Strike'],
+                'bid': row['Bid'],
+                'ask': row['Ask'],
+                'change': row['Change'],
+                'percent_change': row['% Change'],
+                'volume': row['Volume'],
+                'open_interest': row['Open Interest'],
+                'implied_volatility': row['Implied Volatility']
+            }, ignore_index=True)
 
-        calls['implied_volatility'] = calls['implied_volatility'].replace('-', '0.00%')
-        calls['percent_change'] = calls['percent_change'].str.replace(r'^-$', '0.00%', regex=True)
-        calls['volume'] = pd.to_numeric(calls['volume'], errors='coerce').fillna(0)
-        calls['expiration_date'] = pd.to_datetime(calls['expiration_date'], format='%B %d, %Y').dt.strftime('%m/%d/%y')
+    calls['volume'] = pd.to_numeric(calls['volume'], errors='coerce').fillna(0)
+    calls['expiration_date'] = pd.to_datetime(calls['expiration_date'], format='%B %d, %Y').dt.strftime('%m/%d/%y')
 
-        puts['implied_volatility'] = puts['implied_volatility'].replace('-', '0.00%')
-        puts['percent_change'] = puts['percent_change'].str.replace(r'^-$', '0.00%', regex=True)
-        puts['volume'] = pd.to_numeric(puts['volume'], errors='coerce').fillna(0)
-        puts['expiration_date'] = pd.to_datetime(puts['expiration_date'], format='%B %d, %Y').dt.strftime('%m/%d/%y')
+    puts['volume'] = pd.to_numeric(puts['volume'], errors='coerce').fillna(0)
+    puts['expiration_date'] = pd.to_datetime(puts['expiration_date'], format='%B %d, %Y').dt.strftime('%m/%d/%y')
 
-        grouped = calls.groupby(calls['expiration_date'])
+    grouped = calls.groupby(calls['expiration_date'])
 
-        combo_calls = []
-        for date, group in grouped:
-            # print("expiration_date: ", date)
-            # print(group)
-            # print()
+    combo_calls = []
+    for date, group in grouped:
+        # print("expiration_date: ", date)
+        # print(group)
+        # print()
 
-            index = group['volume'].idxmax()
-            actual_index = group.index.get_loc(index)
-            # print(actual_index)
-            above_indices = actual_index - 3
-            below_indices = actual_index + 4
+        index = group['volume'].idxmax()
+        actual_index = group.index.get_loc(index)
+        # print(actual_index)
+        above_indices = actual_index - 3
+        below_indices = actual_index + 4
 
-            if (above_indices < 0):
-                below_indices += (0 - above_indices)
-                above_indices = 0
+        if (above_indices < 0):
+            below_indices += (0 - above_indices)
+            above_indices = 0
 
-            if (below_indices >= len(group)):
-                above_indices -= (below_indices - len(group))
+        if (below_indices >= len(group)):
+            above_indices -= (below_indices - len(group))
 
-            combo_calls.append(group.iloc[above_indices:below_indices])
-            # print(group.iloc[above_indices:below_indices])
-            # print("**********")
+        combo_calls.append(group.iloc[above_indices:below_indices])
+        # print(group.iloc[above_indices:below_indices])
+        # print("**********")
 
-        combined_calls = pd.concat(combo_calls, ignore_index=True)
-        combined_calls['expiration_date'] = pd.to_datetime(combined_calls['expiration_date'])
-        combined_calls = combined_calls.sort_values(by='expiration_date')
-        combined_calls = combined_calls.reset_index(drop=True)
+    combined_calls = pd.concat(combo_calls, ignore_index=True)
+    combined_calls['expiration_date'] = pd.to_datetime(combined_calls['expiration_date'])
+    combined_calls = combined_calls.sort_values(by='expiration_date')
+    combined_calls = combined_calls.reset_index(drop=True)
 
-        # print(combined_calls)
+    # print(combined_calls)
 
 
-        calls = calls.replace('-', 0)
-        calls['volume'] = pd.to_numeric(calls['volume'], errors='coerce').fillna(0).astype(int)
+    calls = calls.replace('-', 0)
+    calls['volume'] = pd.to_numeric(calls['volume'], errors='coerce').fillna(0).astype(int)
 
-        # print(calls.to_string())
+    # print(calls.to_string())
 
-        grouped = calls.groupby(calls['expiration_date'])
+    grouped = calls.groupby(calls['expiration_date'])
 
-        combo_calls = []
-        for date, group in grouped:
-            # print("expiration_date: ", date)
-            # print(group)
-            # print()
+    combo_calls = []
+    for date, group in grouped:
+        # print("expiration_date: ", date)
+        # print(group)
+        # print()
 
-            index = group['volume'].idxmax()
-            actual_index = group.index.get_loc(index)
-            # print(actual_index)
-            above_indices = actual_index - 3
-            below_indices = actual_index + 4
+        index = group['volume'].idxmax()
+        actual_index = group.index.get_loc(index)
+        # print(actual_index)
+        above_indices = actual_index - 3
+        below_indices = actual_index + 4
 
-            if (above_indices < 0):
-                below_indices += (0 - above_indices)
-                above_indices = 0
+        if (above_indices < 0):
+            below_indices += (0 - above_indices)
+            above_indices = 0
 
-            if (below_indices >= len(group)):
-                above_indices -= (below_indices - len(group))
+        if (below_indices >= len(group)):
+            above_indices -= (below_indices - len(group))
 
-            combo_calls.append(group.iloc[above_indices:below_indices])
-            # print(group.iloc[above_indices:below_indices])
-            # print("**********")
+        combo_calls.append(group.iloc[above_indices:below_indices])
+        # print(group.iloc[above_indices:below_indices])
+        # print("**********")
 
-        combined_calls = pd.concat(combo_calls, ignore_index=True)
-        combined_calls['expiration_date'] = pd.to_datetime(combined_calls['expiration_date'])
-        combined_calls = combined_calls.sort_values(by=['expiration_date', 'strike_price'])
+    combined_calls = pd.concat(combo_calls, ignore_index=True)
+    combined_calls['expiration_date'] = pd.to_datetime(combined_calls['expiration_date'])
+    combined_calls = combined_calls.sort_values(by=['expiration_date', 'strike_price'])
 
-        # puts
-        puts = puts.replace('-', 0)
-        puts['volume'] = pd.to_numeric(puts['volume'], errors='coerce').fillna(0).astype(int)
+    # puts
+    puts = puts.replace('-', 0)
+    puts['volume'] = pd.to_numeric(puts['volume'], errors='coerce').fillna(0).astype(int)
 
-        # print(puts.to_string())
+    # print(puts.to_string())
 
-        grouped = puts.groupby(puts['expiration_date'])
+    grouped = puts.groupby(puts['expiration_date'])
 
-        combo_puts = []
-        for date, group in grouped:
-            # print("expiration_date: ", date)
-            # print(group)
-            # print()
+    combo_puts = []
+    for date, group in grouped:
+        # print("expiration_date: ", date)
+        # print(group)
+        # print()
 
-            index = group['volume'].idxmax()
-            actual_index = group.index.get_loc(index)
-            # print(actual_index)
-            above_indices = actual_index - 3
-            below_indices = actual_index + 4
+        index = group['volume'].idxmax()
+        actual_index = group.index.get_loc(index)
+        # print(actual_index)
+        above_indices = actual_index - 3
+        below_indices = actual_index + 4
 
-            if (above_indices < 0):
-                below_indices += (0 - above_indices)
-                above_indices = 0
+        if (above_indices < 0):
+            below_indices += (0 - above_indices)
+            above_indices = 0
 
-            if (below_indices >= len(group)):
-                above_indices -= (below_indices - len(group))
+        if (below_indices >= len(group)):
+            above_indices -= (below_indices - len(group))
 
-            combo_puts.append(group.iloc[above_indices:below_indices])
-            # print(group.iloc[above_indices:below_indices])
-            # print("**********")
+        combo_puts.append(group.iloc[above_indices:below_indices])
+        # print(group.iloc[above_indices:below_indices])
+        # print("**********")
+    print("COMBO PUTS")
+    print(combo_puts)
+    combined_puts = pd.concat(combo_puts, ignore_index=True)
+    combined_puts['expiration_date'] = pd.to_datetime(combined_puts['expiration_date'])
+    combined_puts['option_type'] = 'puts'
+    combined_puts = combined_puts.sort_values(by=['expiration_date', 'strike_price'])
 
-        combined_puts = pd.concat(combo_puts, ignore_index=True)
-        combined_puts['expiration_date'] = pd.to_datetime(combined_puts['expiration_date'])
-        combined_puts['option_type'] = 'puts'
-        combined_puts = combined_puts.sort_values(by=['expiration_date', 'strike_price'])
+    print("CALLS: ")
+    print(combined_calls.to_string())
+    print("PUTS: ")
+    print(combined_puts.to_string())
 
-        # print("CALLS: ")
-        # print(combined_calls.to_string())
-        # print("PUTS: ")
-        # print(combined_puts.to_string())
-
-        return combined_calls, combined_puts
-
-        # print(puts.to_string())
+    return combined_calls, combined_puts
 
 
 # pull once a week, only update if changed?
@@ -472,7 +466,7 @@ def pull_daily():
         # cursor.execute(f"insert into indicators(stock_id, date, sma, ema, bb_middle, bb_lower, bb_upper, roc, r_percent, si_k, si_d, rsi) values ('{indicators_final[0]}', '{indicators_final[1]}', '{indicators_final[2]}', '{indicators_final[3]}','{indicators_final[4]}', '{indicators_final[5]}', '{indicators_final[6]}', '{indicators_final[11]}', '{indicators_final[8]}', '{indicators_final[9]}', '{indicators_final[10]}', '{indicators_final[7]}')")
 
         # TODO: Add options here later.
-        calls, puts = pull_options(start_date)
+        calls, puts = pull_options(stock, start_date)
 
         calls['stock_id'] = stock_id[0]
         puts['stock_id'] = stock_id[0]
@@ -631,7 +625,7 @@ def pull_all(cursor):
         yesterday = dt.date.today() - dt.timedelta(days=1)
         start_date = yesterday.strftime("%m/%d/%y")
 
-        calls, puts = pull_options(current_date=start_date)
+        calls, puts = pull_options(stock, start_date)
 
         calls['stock_id'] = stock_id[0]
         puts['stock_id'] = stock_id[0]
@@ -650,7 +644,7 @@ def pull_all(cursor):
         for i in range(len(puts)):
             params = (str(puts['stock_id'][i]), puts['date'][i], puts['expiration_date'][i], puts['option_type'][i],
                       puts['strike_price'][i], puts['bid'][i], puts['ask'][i], puts['change'][i],
-                      puts['percent_change'][i], str(puts['volume'][i]), puts['open_interest'][i],
+                      str(puts['percent_change'][i]), str(puts['volume'][i]), puts['open_interest'][i],
                       puts['implied_volatility'][i])
             cursor.execute(sql_insert_options, params)
 
@@ -701,6 +695,7 @@ def pull_all(cursor):
 # initialize_stocks()
 
 if __name__ == "__main__":
+    """
     connection_string = f"DRIVER={{{driver}}};SERVER={server};DATABASE={database};Trusted_Connection=yes"
 
     conn = pyodbc.connect(connection_string)
@@ -716,8 +711,15 @@ if __name__ == "__main__":
     # pull_daily()
 
     schedule.every().day.at("22:00").do(pull_daily)
+    """
 
-    # pull_options('10/27/23')
+    """
+    for stock in stock_list:
+        print('--------------------')
+        print(stock)
+        pull_options(stock, '10/27/23')
+    """
+    pull_options('INTC', '10/26/23')
 
     """
     while True:

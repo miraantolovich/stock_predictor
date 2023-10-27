@@ -7,7 +7,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 ALTER PROCEDURE [dbo].[SelectOptionID]
-	@param_stock_id varchar(5)
+	@param_stock_id varchar(5),
+	@param_date varchar(32)
 AS
 BEGIN
     -- SET NOCOUNT ON added to prevent extra result sets from
@@ -15,15 +16,17 @@ BEGIN
     SET NOCOUNT ON;
 
 	DECLARE @stock_id AS INT;
+	DECLARE @date AS DATE;
 
 	SET @stock_id = TRY_CAST(REPLACE( @param_stock_id, ',', '') AS INT)
+	SET @date = TRY_CAST(REPLACE( @param_date, ',', '') AS DATE)
 
     SELECT 
 		stock_id, date, expiration_date, option_type,
 		strike_price, bid, ask, change, percent_change,
 		volume, open_interest, implied_volatility
 	FROM [Stock_Information].[dbo].[Options]
-    WHERE stock_id = @stock_id
+    WHERE stock_id = @stock_id AND date = @date
 	ORDER BY 
 		option_type ASC, 
 		expiration_date ASC, 

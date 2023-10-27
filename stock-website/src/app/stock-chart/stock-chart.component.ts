@@ -62,13 +62,12 @@ export class StockChartComponent implements OnInit {
   
   protected volume_data = [10000, 41000, 35000, 51000, 49000, 62000, 69000, 91000, 148000];
 
-  protected roc_data = [1, 2, 3, 0, -3, -2, -4, 1, 0]
   protected bbData = [{x: "Jan", y: [10, 12]}]
   protected smaData = [{x: "Jan", y: 10}]
   protected emaData = [{x: "Jan", y: 10}]
 
   protected rsiData = [1]
-  protected percentr = [1]
+  protected percentrData = [1]
   protected sikData = [1]
   protected sidData = [1]
   protected rocData = [1]
@@ -612,311 +611,351 @@ export class StockChartComponent implements OnInit {
   protected changeChart2() {
     var data_chart2 = []
 
+    let index = this.stockTypes.indexOf(this.selectedStockType);
+    console.log(index);
+
     if (this.selectedChart2Type == "RSI") {
 
-      let index = this.stockTypes.indexOf(this.selectedStockType);
-      const datePipe = new DatePipe('en-US');
-      console.log(index);
-      
-      console.log("new stock")
       this.apiService.getRsi((index + 1).toString()).subscribe(data => {
+        this.rsiData = data.map(item => item.rsi);
+
+        console.log(this.rsiData)
+
+        this.chart2Options = {
+          series: [
+            {
+              name: "RSI",
+              data: this.rsiData
+            }
+          ],
+          chart: {
+            toolbar: {
+              show: false,
+            },  
+            id: "advanced",
+            group: "stock",
+            type: "line",
+            height: 175
+          },
+          dataLabels: {
+            enabled: false
+          },
+          xaxis: {
+            categories: this.x_axis_data
+          },
+          yaxis: {
+            labels: {
+              minWidth: 60,
+              maxWidth: 60
+            },
+            min: 0,
+            max: 100  
+          },
+          stroke: {
+            curve: "straight",
+            width: [4, 4, 4, 4, 4, 4],
+          },
+          annotations: {
+            yaxis: [
+            {
+              y: 30,
+              borderColor: "green",
+              strokeDashArray: 0,
+              borderWidth: 2,
+              label: {
+                text: "Oversold",
+                style: {
+                  color: "#fff",
+                  background: "green"
+                }
+              }
+            },
+            {
+              y: 70,
+              borderColor: "red",
+              strokeDashArray: 0,
+              borderWidth: 2,
+              label: {
+                text: "Overbought",
+                style: {
+                  color: "#fff",
+                  background: "red"
+                }
+              }
+            }
+          ]
+          }
+        }
+  
       });
           
   
-      this.chart2Options = {
-        series: [
-          {
-            name: "RSI",
-            data: [10, 30, 20, 30, 20, 45, 68, 57, 78],
-          }
-        ],
-        chart: {
-          toolbar: {
-            show: false,
-          },  
-          id: "advanced",
-          group: "stock",
-          type: "line",
-          height: 175
-        },
-        dataLabels: {
-          enabled: false
-        },
-        xaxis: {
-          categories: this.x_axis_data
-        },
-        yaxis: {
-          labels: {
-            minWidth: 60,
-            maxWidth: 60
-          },
-          min: 0,
-          max: 100  
-        },
-        stroke: {
-          curve: "straight",
-          width: [4, 4, 4, 4, 4, 4],
-        },
-        annotations: {
-          yaxis: [
-          {
-            y: 30,
-            borderColor: "green",
-            strokeDashArray: 0,
-            borderWidth: 2,
-            label: {
-              text: "Oversold",
-              style: {
-                color: "#fff",
-                background: "green"
-              }
-            }
-          },
-          {
-            y: 70,
-            borderColor: "red",
-            strokeDashArray: 0,
-            borderWidth: 2,
-            label: {
-              text: "Overbought",
-              style: {
-                color: "#fff",
-                background: "red"
-              }
-            }
-          }
-        ]
-        }
-      }
     } 
 
     else if (this.selectedChart2Type == "%R") {
-      this.chart2Options = {
-        series: [
-          {
-            name: "%R",
-            data: [-10, -30, -20, -30, -20, -45, -68, -57, -78]
-          }
-        ],
-        chart: {
-          toolbar: {
-            show: false,
-          },  
-          id: "advanced",
-          group: "stock",
-          type: "line",
-          height: 175
-        },
-        dataLabels: {
-          enabled: false
-        },
-        xaxis: {
-          categories: this.x_axis_data
-        },
-        yaxis: {
-          labels: {
-            minWidth: 60,
-            maxWidth: 60
+
+      this.apiService.getRPercent((index + 1).toString()).subscribe(data => {
+        this.percentrData = data.map(item => item.r_percent);
+
+        console.log(this.percentrData)
+
+        this.chart2Options = {
+          series: [
+            {
+              name: "%R",
+              data: this.percentrData
+            }
+          ],
+          chart: {
+            toolbar: {
+              show: false,
+            },  
+            id: "advanced",
+            group: "stock",
+            type: "line",
+            height: 175
           },
-          min: -100,
-          max: 0  
-        },
-        stroke: {
-          curve: "straight",
-          width: [4, 4, 4, 4, 4, 4],
-        },
-        annotations: {
-          yaxis: [
-          {
-            y: -20,
-            borderColor: "red",
-            strokeDashArray: 0,
-            borderWidth: 2,
-            label: {
-              text: "Overbought",
-              style: {
-                color: "#fff",
-                background: "red"
+          dataLabels: {
+            enabled: false
+          },
+          xaxis: {
+            categories: this.x_axis_data
+          },
+          yaxis: {
+            labels: {
+              minWidth: 60,
+              maxWidth: 60
+            },
+            min: -100,
+            max: 0  
+          },
+          stroke: {
+            curve: "straight",
+            width: [4, 4, 4, 4, 4, 4],
+          },
+          annotations: {
+            yaxis: [
+            {
+              y: -20,
+              borderColor: "red",
+              strokeDashArray: 0,
+              borderWidth: 2,
+              label: {
+                text: "Overbought",
+                style: {
+                  color: "#fff",
+                  background: "red"
+                }
+              }
+            },
+            {
+              y: -80,
+              borderColor: "green",
+              strokeDashArray: 0,
+              borderWidth: 2,
+              label: {
+                text: "Oversold",
+                style: {
+                  color: "#fff",
+                  background: "green"
+                }
               }
             }
-          },
-          {
-            y: -80,
-            borderColor: "green",
-            strokeDashArray: 0,
-            borderWidth: 2,
-            label: {
-              text: "Oversold",
-              style: {
-                color: "#fff",
-                background: "green"
-              }
-            }
+          ]
           }
-        ]
-        }
-      }
+        }  
+      });
     }
 
     else if (this.selectedChart2Type == "SO") {
-      this.chart2Options = {
-        series: [
-          {
-            name: "SO",
-            data: [10, 30, 20, 30, 20, 45, 68, 57, 78],
-          }
-          // add %K & %D
-        ],
-        chart: {
-          toolbar: {
-            show: false,
-          },  
-          id: "advanced",
-          group: "stock",
-          type: "line",
-          height: 175
-        },
-        dataLabels: {
-          enabled: false
-        },
-        xaxis: {
-          categories: this.x_axis_data
-        },
-        yaxis: {
-          labels: {
-            minWidth: 60,
-            maxWidth: 60
+
+      this.apiService.getSI((index + 1).toString()).subscribe(data => {
+        this.sikData = data.map(item => item.si_k);
+        this.sidData = data.map(item => item.si_d);
+
+        console.log(this.sikData)
+        console.log(this.sidData)
+
+        this.chart2Options = {
+          series: [
+            {
+              name: "K%",
+              data: this.sikData
+            },
+            {
+              name: "D%",
+              data: this.sidData
+            }
+          ],
+          chart: {
+            toolbar: {
+              show: false,
+            },  
+            id: "advanced",
+            group: "stock",
+            type: "line",
+            height: 175
           },
-          min: 0,
-          max: 100  
-        },
-        stroke: {
-          curve: "straight",
-          width: [4, 4, 4, 4, 4, 4],
-        },
-        annotations: {
-          yaxis: [
-          {
-            y: 20,
-            borderColor: "green",
-            strokeDashArray: 0,
-            borderWidth: 2,
-            label: {
-              text: "Oversold",
-              style: {
-                color: "#fff",
-                background: "green"
+          dataLabels: {
+            enabled: false
+          },
+          xaxis: {
+            categories: this.x_axis_data
+          },
+          yaxis: {
+            labels: {
+              minWidth: 60,
+              maxWidth: 60
+            },
+            min: 0,
+            max: 100  
+          },
+          stroke: {
+            curve: "straight",
+            width: [4, 4, 4, 4, 4, 4],
+          },
+          annotations: {
+            yaxis: [
+            {
+              y: 20,
+              borderColor: "green",
+              strokeDashArray: 0,
+              borderWidth: 2,
+              label: {
+                text: "Oversold",
+                style: {
+                  color: "#fff",
+                  background: "green"
+                }
+              }
+            },
+            {
+              y: 80,
+              borderColor: "red",
+              strokeDashArray: 0,
+              borderWidth: 2,
+              label: {
+                text: "Overbought",
+                style: {
+                  color: "#fff",
+                  background: "red"
+                }
               }
             }
-          },
-          {
-            y: 80,
-            borderColor: "red",
-            strokeDashArray: 0,
-            borderWidth: 2,
-            label: {
-              text: "Overbought",
-              style: {
-                color: "#fff",
-                background: "red"
-              }
-            }
+          ]
           }
-        ]
         }
-      }
+  
+      });
+
     }
 
     else if (this.selectedChart2Type == "ROC") {
-      this.chart2Options = {
-        series: [
-          {
-            name: "ROC",
-            data: this.roc_data,
-          }
-        ],
-        chart: {
-          toolbar: {
-            show: false,
-          },  
-          id: "advanced",
-          group: "stock",
-          type: "line",
-          height: 175
-        },
-        dataLabels: {
-          enabled: false
-        },
-        xaxis: {
-          categories: this.x_axis_data
-        },
-        yaxis: {
-          forceNiceScale: true,
-          labels: {
-            minWidth: 60,
-            maxWidth: 60
-          }
-        },
-        stroke: {
-          curve: "straight",
-          width: [4, 4, 4, 4, 4, 4],
-        },
-        annotations: {
-          yaxis: [
-          {
-            y: 0,
-            borderColor: "black",
-            strokeDashArray: 0,
-            borderWidth: 2,
-            label: {
-              text: "Movement",
-              style: {
-                color: "#fff",
-                background: "black"
-              }
-            }
-          }]
-        }
 
-      };  
+      this.apiService.getRoc((index + 1).toString()).subscribe(data => {
+        this.rocData = data.map(item => item.roc);
+
+        console.log(this.rocData)
+
+        this.chart2Options = {
+          series: [
+            {
+              name: "ROC",
+              data: this.rocData,
+            }
+          ],
+          chart: {
+            toolbar: {
+              show: false,
+            },  
+            id: "advanced",
+            group: "stock",
+            type: "line",
+            height: 175
+          },
+          dataLabels: {
+            enabled: false
+          },
+          xaxis: {
+            categories: this.x_axis_data
+          },
+          yaxis: {
+            forceNiceScale: true,
+            labels: {
+              minWidth: 60,
+              maxWidth: 60
+            }
+          },
+          stroke: {
+            curve: "straight",
+            width: [4, 4, 4, 4, 4, 4],
+          },
+          annotations: {
+            yaxis: [
+            {
+              y: 0,
+              borderColor: "black",
+              strokeDashArray: 0,
+              borderWidth: 2,
+              label: {
+                text: "Movement",
+                style: {
+                  color: "#fff",
+                  background: "black"
+                }
+              }
+            }]
+          }
+  
+        };  
+  
+      });
+
     }
 
     //show volume
     else {
-      this.chart2Options = {
-        series: [
-          {
-            name: "Volume",
-            data: this.volume_data,
+      this.apiService.getVolume((index + 1).toString()).subscribe(data => {
+        this.volume_data = data.map(item => item.volume);
+
+        console.log(this.volume_data)
+
+        this.chart2Options = {
+          series: [
+            {
+              name: "Volume",
+              data: this.volume_data,
+            }
+          ],
+          chart: {
+            toolbar: {
+              show: false,
+            },  
+            id: "advanced",
+            group: "stock",
+            type: "area",
+            height: 175
+          },
+          dataLabels: {
+            enabled: false
+          },
+          xaxis: {
+            categories: this.x_axis_data
+          },
+          yaxis: {
+            forceNiceScale: true,
+            labels: {
+              minWidth: 60,
+              maxWidth: 60
+            }
+          },
+          stroke: {
+            curve: "straight",
+            width: [4, 4, 4, 4, 4, 4],
           }
-        ],
-        chart: {
-          toolbar: {
-            show: false,
-          },  
-          id: "advanced",
-          group: "stock",
-          type: "area",
-          height: 175
-        },
-        dataLabels: {
-          enabled: false
-        },
-        xaxis: {
-          categories: this.x_axis_data
-        },
-        yaxis: {
-          forceNiceScale: true,
-          labels: {
-            minWidth: 60,
-            maxWidth: 60
-          }
-        },
-        stroke: {
-          curve: "straight",
-          width: [4, 4, 4, 4, 4, 4],
-        }
-      };  
+        };  
+  
+      });
     }
     
   }
@@ -932,7 +971,9 @@ export class StockChartComponent implements OnInit {
         return datePipe.transform(new Date(dateString), 'dd MMM yyyy') || '';
       }
       
-      const filteredOptions = data.filter(option => convertToDateSimplified(option.expiration_date) === this.selectedOptionsDate && option.option_type === this.selectedOptionsType.toLowerCase());
+      console.log(data)
+      console.log(this.selectedOptionsDate)
+      let filteredOptions = data.filter(option => convertToDateSimplified(option.expiration_date) === this.selectedOptionsDate && option.option_type === this.selectedOptionsType.toLowerCase());
 
       console.log(filteredOptions)
 
@@ -1005,6 +1046,7 @@ export class StockChartComponent implements OnInit {
 
     this.changeChart1();
     this.changeChart2();
+    this.updateOptions();
   }
 
 }

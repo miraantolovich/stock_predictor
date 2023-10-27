@@ -31,6 +31,8 @@ sql_select_roc = "EXEC [Stock_Information].[dbo].[SelectROCID] ?"
 sql_select_rpercent = "EXEC [Stock_Information].[dbo].[SelectRPercentID] ?"
 sql_select_si = "EXEC [Stock_Information].[dbo].[SelectSIID] ?"
 sql_select_rsi = "EXEC [Stock_Information].[dbo].[SelectRsiID] ?"
+sql_select_volume = "EXEC [Stock_Information].[dbo].[SelectVolumeID] ?"
+
 
 sql_select_earningsestimate = "EXEC [Stock_Information].[dbo].[SelectEarningsEstimateID] ?"
 sql_select_earningshistory = "EXEC [Stock_Information].[dbo].[SelectEarningsHistoryID] ?"
@@ -338,6 +340,33 @@ def get_rsi_id(stock_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/indicator/volume/<stock_id>', methods=['GET'])
+def get_volume_id(stock_id):
+    try:
+        connection_string = f"DRIVER={{{driver}}};SERVER={server};DATABASE={database};Trusted_Connection=yes"
+
+        conn = pyodbc.connect(connection_string)
+        cursor = conn.cursor()
+
+        cursor.execute(sql_select_volume, stock_id)
+        result = cursor.fetchall()
+
+        # Fetch all rows as a list of dictionaries
+        data = []
+        for row in result:
+            data.append({
+                'stock_id': row.stock_id,
+                'date': row.date,
+                'volume': row.volume
+            })
+
+        cursor.close()
+        conn.close()
+
+        return jsonify(data)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/api/option/<stock_id>', methods=['GET'])

@@ -74,6 +74,11 @@ export interface IRsi {
   rsi: number;
 }
 
+export interface IVolume {
+  date: string;
+  volume: number;
+}
+
 export interface IOption {
   ask: string;
   bid: string;
@@ -159,6 +164,10 @@ export class ApiService {
 
   getRsi(stockId: string) {
     return this.http.get<IRsi[]>(`${this.apiBaseUrl}/indicator/rsi/${stockId}`);
+  }
+
+  getVolume(stockId: string) {
+    return this.http.get<IVolume[]>(`${this.apiBaseUrl}/indicator/volume/${stockId}`);
   }
 
 
