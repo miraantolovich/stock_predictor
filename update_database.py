@@ -25,8 +25,8 @@ pd.set_option('display.max_columns', None)
 
 # get list of all stocks to compare
 # INTC (large), CWH (small-med), GBX (small), SOFI (medium), SUZ (medium), AAL (medium)
-# stock_list = ["INTC"]
-stock_list = ["INTC", "CWH", "GBX", "SOFI", "SUZ", "AAL"]
+stock_list = ["INTC"]
+# stock_list = ["INTC", "CWH", "GBX", "SOFI", "SUZ", "AAL"]
 stock_name = ["Intel Corporation", "Camping World Holdings", "The Greenbrier Companies", "SoFi Technologies",
               "Suzano S.A.", "American Airlines Group"]
 # endregion
@@ -92,12 +92,11 @@ def pull_options(current_date):
 
     for stock in stock_list:
         get_dates = ops.get_expiration_dates(stock)
-        print(get_dates)
+        # print(get_dates)
 
         for date in get_dates:
             get_calls = ops.get_calls(stock, date)
-            # print(get_all)
-
+            #print(get_calls)
             for index, row in get_calls.iterrows():
                 # print(row)
                 calls = calls.append({
@@ -119,7 +118,7 @@ def pull_options(current_date):
 
             for index, row in get_puts.iterrows():
                 # print(row)
-                puts = calls.append({
+                puts = puts.append({
                     'stock_id': stock,
                     'date': current_date,
                     'expiration_date': date,
@@ -135,18 +134,14 @@ def pull_options(current_date):
                 }, ignore_index=True)
 
         calls['implied_volatility'] = calls['implied_volatility'].replace('-', '0.00%')
-        calls['percent_change'] = calls['percent_change'].str.replace('-', '0.00%')
-        calls = calls.replace('-', '0')
+        calls['percent_change'] = calls['percent_change'].str.replace(r'^-$', '0.00%', regex=True)
         calls['volume'] = pd.to_numeric(calls['volume'], errors='coerce').fillna(0)
         calls['expiration_date'] = pd.to_datetime(calls['expiration_date'], format='%B %d, %Y').dt.strftime('%m/%d/%y')
 
         puts['implied_volatility'] = puts['implied_volatility'].replace('-', '0.00%')
-        puts['percent_change'] = puts['percent_change'].str.replace('-', '0.00%')
-        puts = puts.replace('-', '0')
-        puts['volume'] = pd.to_numeric(calls['volume'], errors='coerce').fillna(0)
+        puts['percent_change'] = puts['percent_change'].str.replace(r'^-$', '0.00%', regex=True)
+        puts['volume'] = pd.to_numeric(puts['volume'], errors='coerce').fillna(0)
         puts['expiration_date'] = pd.to_datetime(puts['expiration_date'], format='%B %d, %Y').dt.strftime('%m/%d/%y')
-
-        # print(calls.to_string())
 
         grouped = calls.groupby(calls['expiration_date'])
 
@@ -208,8 +203,8 @@ def pull_options(current_date):
                 above_indices -= (below_indices - len(group))
 
             combo_calls.append(group.iloc[above_indices:below_indices])
-            print(group.iloc[above_indices:below_indices])
-            print("**********")
+            # print(group.iloc[above_indices:below_indices])
+            # print("**********")
 
         combined_calls = pd.concat(combo_calls, ignore_index=True)
         combined_calls['expiration_date'] = pd.to_datetime(combined_calls['expiration_date'])
@@ -243,18 +238,18 @@ def pull_options(current_date):
                 above_indices -= (below_indices - len(group))
 
             combo_puts.append(group.iloc[above_indices:below_indices])
-            print(group.iloc[above_indices:below_indices])
-            print("**********")
+            # print(group.iloc[above_indices:below_indices])
+            # print("**********")
 
         combined_puts = pd.concat(combo_puts, ignore_index=True)
         combined_puts['expiration_date'] = pd.to_datetime(combined_puts['expiration_date'])
         combined_puts['option_type'] = 'puts'
         combined_puts = combined_puts.sort_values(by=['expiration_date', 'strike_price'])
 
-        print("CALLS: ")
-        print(combined_calls)
-        print("PUTS: ")
-        print(combined_puts)
+        # print("CALLS: ")
+        # print(combined_calls.to_string())
+        # print("PUTS: ")
+        # print(combined_puts.to_string())
 
         return combined_calls, combined_puts
 
@@ -267,8 +262,6 @@ def pull_analyst(stock):
     # print(get_analyst)
 
     print("**** Earnings Estimate ****")
-
-    get_analyst = sti.get_analysts_info("AAPL")
     # print(get_analyst["Earnings Estimate"])
 
     earnings_estimate = pd.DataFrame(get_analyst["Earnings Estimate"])
@@ -695,54 +688,6 @@ def pull_all(cursor):
 # endregion
 
 
-"""
-def do_indicators():
-    stock_data = sti.get_data("INTC", start_date="01/01/2019")
-
-    stock_data['date'] = stock_data.index
-    stock_data = stock_data[['ticker', 'date', 'open', 'close', 'low', 'high', 'adjclose', 'volume']]
-    stock_data.columns = ['stock_id', 'date', 'open_price', 'close_price', 'low_price', 'high_price',
-                          'adjusted_close_price', 'volume']
-
-    # round everything to 2 decimal points
-    stock_data['open_price'] = stock_data['open_price'].round(2)
-    stock_data['close_price'] = stock_data['close_price'].round(2)
-    stock_data['low_price'] = stock_data['low_price'].round(2)
-    stock_data['high_price'] = stock_data['high_price'].round(2)
-    stock_data['adjusted_close_price'] = stock_data['adjusted_close_price'].round(2)
-
-    # drop index
-    stock_data.reset_index(drop=True, inplace=True)
-
-    date_id = stock_data[['stock_id', 'date']]
-    all_indicators = date_id
-
-    sma_200 = indicators.calculate_sma(stock_data['adjusted_close_price'], days=50)
-    all_indicators = all_indicators.join(sma_200)
-
-    ema_26 = indicators.calculate_ema(stock_data['adjusted_close_price'])
-    all_indicators = all_indicators.join(ema_26)
-
-    bb_20 = indicators.calculate_bb(stock_data['adjusted_close_price'])
-    all_indicators = all_indicators.join(bb_20)
-
-    rsi_14 = indicators.calculate_rsi(stock_data['adjusted_close_price'])
-    all_indicators = all_indicators.join(rsi_14)
-
-    percent_r_14 = indicators.calculate_percent_r(stock_data['adjusted_close_price'])
-    all_indicators = all_indicators.join(percent_r_14)
-
-    so_14 = indicators.calculate_so(stock_data['adjusted_close_price'])
-    all_indicators = all_indicators.join(so_14)
-
-    percent_roc_14 = indicators.calculate_roc(stock_data['adjusted_close_price'])
-    all_indicators = all_indicators.join(percent_roc_14)
-
-    print(all_indicators.to_string())
-"""
-
-
-
 # today = dt.date.today()
 # start_date = today.strftime("%m/%d/%y")
 # pull_options(start_date)
@@ -771,6 +716,8 @@ if __name__ == "__main__":
     # pull_daily()
 
     schedule.every().day.at("22:00").do(pull_daily)
+
+    # pull_options('10/27/23')
 
     """
     while True:

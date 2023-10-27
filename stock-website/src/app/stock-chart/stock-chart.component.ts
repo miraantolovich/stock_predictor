@@ -66,6 +66,12 @@ export class StockChartComponent implements OnInit {
   protected bbData = [{x: "Jan", y: [10, 12]}]
   protected smaData = [{x: "Jan", y: 10}]
   protected emaData = [{x: "Jan", y: 10}]
+
+  protected rsiData = [1]
+  protected percentr = [1]
+  protected sikData = [1]
+  protected sidData = [1]
+  protected rocData = [1]
   
   protected earningsEstimate = [
     { date: 'Jun 2023', average: '1.19', low: '1.14', high: '1.45' },
@@ -607,6 +613,16 @@ export class StockChartComponent implements OnInit {
     var data_chart2 = []
 
     if (this.selectedChart2Type == "RSI") {
+
+      let index = this.stockTypes.indexOf(this.selectedStockType);
+      const datePipe = new DatePipe('en-US');
+      console.log(index);
+      
+      console.log("new stock")
+      this.apiService.getRsi((index + 1).toString()).subscribe(data => {
+      });
+          
+  
       this.chart2Options = {
         series: [
           {
@@ -906,8 +922,36 @@ export class StockChartComponent implements OnInit {
   }
 
   protected updateOptions() {
-    console.log("update options");
+    let index = this.stockTypes.indexOf(this.selectedStockType);
+    const datePipe = new DatePipe('en-US');
+    console.log(index);
 
+    this.apiService.getOption((index + 1).toString()).subscribe(data => {
+
+      function convertToDateSimplified(dateString: string) {
+        return datePipe.transform(new Date(dateString), 'dd MMM yyyy') || '';
+      }
+      
+      const filteredOptions = data.filter(option => convertToDateSimplified(option.expiration_date) === this.selectedOptionsDate && option.option_type === this.selectedOptionsType.toLowerCase());
+
+      console.log(filteredOptions)
+
+      this.options_data = filteredOptions.map(data => ({
+        strike_price: data.strike_price,
+        bid: data.bid,
+        ask: data.ask,
+        change: data.change,
+        percent_change: data.percent_change,
+        volume: data.volume,
+        open_interest: data.open_interest,
+        implied_volatility: data.implied_volatility,  
+      }));
+
+      console.log(this.options_data)
+
+    });
+
+    /*
     this.options_data = [
       {
         strike_price: "155",
@@ -951,6 +995,7 @@ export class StockChartComponent implements OnInit {
         implied_volatility: "395.12%",
       }
     ]
+    */
   
   }
 

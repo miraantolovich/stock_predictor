@@ -117,6 +117,7 @@ ON Indicators(stock_id, date);
 CREATE TABLE EarningsEstimate (
 	earnings_estimate_id INT IDENTITY(1,1) PRIMARY KEY,
     stock_id INT,
+	data_order INT,
     date VARCHAR(32),
 	average VARCHAR(16),
     low VARCHAR(16),
@@ -132,6 +133,7 @@ ON EarningsEstimate(stock_id);
 CREATE TABLE RevenueEstimate (
 	analyst_id INT IDENTITY(1,1) PRIMARY KEY,
     stock_id INT,
+	data_order INT,
     date VARCHAR(32),
 	average VARCHAR(16),
     low VARCHAR(16),
@@ -146,6 +148,7 @@ ON RevenueEstimate(stock_id);
 CREATE TABLE EarningsHistory (
 	earnings_id INT IDENTITY(1,1) PRIMARY KEY,
     stock_id INT,
+	data_order INT,
     year VARCHAR(32),
 	average VARCHAR(16),
     actual VARCHAR(16),
