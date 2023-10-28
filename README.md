@@ -5,7 +5,9 @@
 ![Dashboard Screenshot](/images/aal-indicators.png)
 ![Dashboard Screenshot](/images/cwh-indicators.png)
 
-Welcome to the Financial Data Dashboard project! This project was conceived and developed as a solo effort to provide a comprehensive and interactive platform for visualizing various financial indicators and data, including candle charts, line charts, Bollinger Bands, Simple Moving Averages (SMA), Exponential Moving Averages (EMA), volume, Relative Strength Index (RSI), %R, Stochastic Oscillator, Rate of Change (ROC), earnings estimates, revenue estimates, earnings history, and options chain data.
+This is my Financial Data Dashboard project! This project was conceived and developed as a solo effort to provide a comprehensive and interactive platform for visualizing various financial indicators and data, including candle charts, line charts, Bollinger Bands, Simple Moving Averages (SMA), Exponential Moving Averages (EMA), volume, Relative Strength Index (RSI), %R, Stochastic Oscillator, Rate of Change (ROC), earnings estimates, revenue estimates, earnings history, and options chain data.
+
+It currently only runs locally, but I am in the process of hosting it online.
 
 ## Features
 
