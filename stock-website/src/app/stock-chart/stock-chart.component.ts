@@ -376,35 +376,13 @@ export class StockChartComponent implements OnInit {
 
   // Would it be better for the API to give me the entire data-set for the stock & then I pick and choose what data to display 
   // or would it be better for my API to call only the data I need and then I format it accordingly?
-  protected changeChart1() {    
-    // line
-    if (this.selectedGraphType == "line") {
-      this.ifLine();
-    }
-    // candle
-    else if (this.selectedGraphType == "candle") {
-      this.showSMA = false;
-      this.showEMA = false;
-      this.showBB = false;
-
-      this.ifCandle();
-    }
-    else {
-      console.log("This shouldn't be possible! Error!");  
-    }
-  }
-  
-
-  private ifLine() {
-    var data_line = []
-    var all_colors = []
-
+  private loadLineData() {
+    let dataIsLoaded = false
     // get stock data just close
     let index = this.stockTypes.indexOf(this.selectedStockType);
     const datePipe = new DatePipe('en-US');
     console.log(index);
-    
-    console.log("new stock")
+
     this.apiService.getPrice((index + 1).toString()).subscribe(data => {
       this.stock_data = data.map(price => ({
         x: datePipe.transform(new Date(price.date), 'yyyy-MM-dd') || '',
@@ -413,18 +391,10 @@ export class StockChartComponent implements OnInit {
 
       this.x_axis_data = data.map(price => datePipe.transform(new Date(price.date), 'yyyy-MM-dd') || '');
 
-
       console.log(this.stock_data);
       console.log(this.x_axis_data);
     });
     
-    console.log("line")
-    data_line.push({
-      data: this.stock_data,
-      name: this.selectedStockType
-    })
-    all_colors.push(this.stockColor);
-
     if (this.showBB) {
 
       this.apiService.getBB((index + 1).toString()).subscribe(data => {
@@ -434,13 +404,6 @@ export class StockChartComponent implements OnInit {
         }));
 
         console.log(this.bbData);
-
-        data_line.push({   
-          type: "rangeArea",
-          name: "BB",
-          data: this.bbData
-        })
-        all_colors.push(this.bbColor);
       });
 
     }
@@ -455,13 +418,6 @@ export class StockChartComponent implements OnInit {
         }));
 
         console.log(this.smaData);
-
-        data_line.push({
-          name: "SMA",
-          data: this.smaData,
-          type: "line"
-        })
-        all_colors.push(this.smaColor);
       });
     }
 
@@ -474,14 +430,59 @@ export class StockChartComponent implements OnInit {
         }));
 
         console.log(this.emaData);
-
-        data_line.push({
-          name: "EMA",
-          data: this.emaData,
-          type: "line"
-        })
-        all_colors.push(this.emaColor);
       });
+    }
+
+    dataIsLoaded = true
+
+    const checkDataInterval = setInterval(() => {
+      if (dataIsLoaded) {
+        clearInterval(checkDataInterval); // Stop the loop
+        this.dataLoaded = true; // Set the dataLoaded flag
+        this.ifLine(); // Initialize charts or other actions
+      }
+    }, 1000); // Check every 1 second
+
+  }
+
+  private ifLine() {
+
+    var data_line = []
+    var all_colors = []
+
+    
+    console.log("new stock")
+    console.log("line")
+
+    data_line.push({
+      data: this.stock_data,
+      name: this.selectedStockType
+    })
+    all_colors.push(this.stockColor);
+
+    if (this.showBB) {
+      data_line.push({   
+        type: "rangeArea",
+        name: "BB",
+        data: this.bbData
+      })
+      all_colors.push(this.bbColor);
+    }
+    if (this.showSMA) {
+      data_line.push({
+        name: "SMA",
+        data: this.smaData,
+        type: "line"
+      })
+      all_colors.push(this.smaColor);
+    }
+    if (this.showEMA) {
+      data_line.push({
+        name: "EMA",
+        data: this.emaData,
+        type: "line"
+      })
+      all_colors.push(this.emaColor);
     }
 
     // BB can be rangeArea (change chart to rangeArea, y axis tooltip enabled false)
@@ -544,8 +545,6 @@ export class StockChartComponent implements OnInit {
         colors: all_colors
       }; 
     }
-
-
   }
 
   private ifCandle() {
@@ -607,6 +606,25 @@ export class StockChartComponent implements OnInit {
     });
   }
 
+  protected changeChart1() {    
+    
+
+    // line
+    if (this.selectedGraphType == "line") {
+      this.loadLineData();
+    }
+    // candle
+    else if (this.selectedGraphType == "candle") {
+      this.showSMA = false;
+      this.showEMA = false;
+      this.showBB = false;
+
+      this.ifCandle();
+    }
+    else {
+      console.log("This shouldn't be possible! Error!");  
+    }
+  }
 
   protected changeChart2() {
     var data_chart2 = []
@@ -960,6 +978,31 @@ export class StockChartComponent implements OnInit {
     
   }
 
+  protected updateOptionsDates() {
+    let index = this.stockTypes.indexOf(this.selectedStockType);
+    const datePipe = new DatePipe('en-US');
+    console.log(index);
+
+    this.apiService.getOption((index + 1).toString()).subscribe(data => {
+
+      function convertToDateSimplified(dateString: string) {
+        return datePipe.transform(new Date(dateString), 'dd MMM yyyy') || '';
+      }
+      
+      let expirationDates = data.map(item => item.expiration_date);
+      const uniqueExpirationDatesSet = new Set(expirationDates);
+      const uniqueExpirationDatesArray = Array.from(uniqueExpirationDatesSet);
+      const simplifiedDates = uniqueExpirationDatesArray.map(convertToDateSimplified);
+
+      console.log(simplifiedDates);
+      this.options_dates = simplifiedDates;
+      this.selectedOptionsDate = this.options_dates[0];
+
+      console.log(this.options_data)
+
+    });
+  }
+
   protected updateOptions() {
     let index = this.stockTypes.indexOf(this.selectedStockType);
     const datePipe = new DatePipe('en-US');
@@ -1040,13 +1083,54 @@ export class StockChartComponent implements OnInit {
   
   }
 
+  protected updateTables() {
+    let index = this.stockTypes.indexOf(this.selectedStockType);
+
+    this.apiService.getEarningsEstimate((index + 1).toString()).subscribe(data => {
+      this.earningsEstimate = data.map(earnings => ({
+        date: earnings.date,
+        average: earnings.average,
+        low: earnings.low,
+        high: earnings.high
+      }));
+    
+      console.log(this.earningsEstimate);
+    });
+
+    this.apiService.getRevenueEstimate((index + 1).toString()).subscribe(data => {
+      this.revenueEstimate = data.map(earnings => ({
+        date: earnings.date,
+        average: earnings.average,
+        low: earnings.low,
+        high: earnings.high
+      }));
+    
+      console.log(this.revenueEstimate);
+    });
+
+    this.apiService.getEarningsHistory((index + 1).toString()).subscribe(data => {
+      this.earningsHistory = data.map(earnings => ({
+        year: earnings.year,
+        average: earnings.average,
+        actual: earnings.actual,
+        difference: earnings.difference
+      }));
+    
+      console.log(this.earningsHistory);
+
+    });
+
+  }
+
   protected updateBothCharts() {
 
     console.log("New Stock Data");
 
     this.changeChart1();
     this.changeChart2();
+    this.updateOptionsDates();
     this.updateOptions();
+    this.updateTables();
   }
 
 }

@@ -91,10 +91,10 @@ def pull_options(stock, current_date):
     puts = pd.DataFrame(data)
 
     get_dates = ops.get_expiration_dates(stock)
-    # print(get_dates)
+    print(get_dates)
 
     for date in get_dates:
-        get_calls = ops.get_calls(stock)
+        get_calls = ops.get_calls(stock, date)
         #print(get_calls)
         for index, row in get_calls.iterrows():
             # print(row)
@@ -113,7 +113,7 @@ def pull_options(stock, current_date):
                 'implied_volatility': row['Implied Volatility']
             }, ignore_index=True)
 
-        get_puts = ops.get_puts(stock)
+        get_puts = ops.get_puts(stock, date)
 
         for index, row in get_puts.iterrows():
             # print(row)
@@ -165,52 +165,11 @@ def pull_options(stock, current_date):
 
     combined_calls = pd.concat(combo_calls, ignore_index=True)
     combined_calls['expiration_date'] = pd.to_datetime(combined_calls['expiration_date'])
-    combined_calls = combined_calls.sort_values(by='expiration_date')
-    combined_calls = combined_calls.reset_index(drop=True)
-
-    # print(combined_calls)
-
-
-    calls = calls.replace('-', 0)
-    calls['volume'] = pd.to_numeric(calls['volume'], errors='coerce').fillna(0).astype(int)
-
-    # print(calls.to_string())
-
-    grouped = calls.groupby(calls['expiration_date'])
-
-    combo_calls = []
-    for date, group in grouped:
-        # print("expiration_date: ", date)
-        # print(group)
-        # print()
-
-        index = group['volume'].idxmax()
-        actual_index = group.index.get_loc(index)
-        # print(actual_index)
-        above_indices = actual_index - 3
-        below_indices = actual_index + 4
-
-        if (above_indices < 0):
-            below_indices += (0 - above_indices)
-            above_indices = 0
-
-        if (below_indices >= len(group)):
-            above_indices -= (below_indices - len(group))
-
-        combo_calls.append(group.iloc[above_indices:below_indices])
-        # print(group.iloc[above_indices:below_indices])
-        # print("**********")
-
-    combined_calls = pd.concat(combo_calls, ignore_index=True)
-    combined_calls['expiration_date'] = pd.to_datetime(combined_calls['expiration_date'])
+    combined_calls['option_type'] = 'calls'
     combined_calls = combined_calls.sort_values(by=['expiration_date', 'strike_price'])
 
     # puts
-    puts = puts.replace('-', 0)
     puts['volume'] = pd.to_numeric(puts['volume'], errors='coerce').fillna(0).astype(int)
-
-    # print(puts.to_string())
-
     grouped = puts.groupby(puts['expiration_date'])
 
     combo_puts = []
@@ -235,12 +194,16 @@ def pull_options(stock, current_date):
         combo_puts.append(group.iloc[above_indices:below_indices])
         # print(group.iloc[above_indices:below_indices])
         # print("**********")
-    print("COMBO PUTS")
-    print(combo_puts)
     combined_puts = pd.concat(combo_puts, ignore_index=True)
     combined_puts['expiration_date'] = pd.to_datetime(combined_puts['expiration_date'])
     combined_puts['option_type'] = 'puts'
     combined_puts = combined_puts.sort_values(by=['expiration_date', 'strike_price'])
+
+    def replace_percent_change(cell):
+        return '0.00%' if cell == '-' else cell
+
+    combined_calls['percent_change'] = combined_calls['percent_change'].apply(replace_percent_change)
+    combined_puts['percent_change'] = combined_puts['percent_change'].apply(replace_percent_change)
 
     print("CALLS: ")
     print(combined_calls.to_string())
@@ -695,7 +658,7 @@ def pull_all(cursor):
 # initialize_stocks()
 
 if __name__ == "__main__":
-    """
+    """"""
     connection_string = f"DRIVER={{{driver}}};SERVER={server};DATABASE={database};Trusted_Connection=yes"
 
     conn = pyodbc.connect(connection_string)
@@ -711,7 +674,7 @@ if __name__ == "__main__":
     # pull_daily()
 
     schedule.every().day.at("22:00").do(pull_daily)
-    """
+    """"""
 
     """
     for stock in stock_list:
@@ -719,7 +682,7 @@ if __name__ == "__main__":
         print(stock)
         pull_options(stock, '10/27/23')
     """
-    pull_options('INTC', '10/26/23')
+    #pull_options('INTC', '10/26/23')
 
     """
     while True:

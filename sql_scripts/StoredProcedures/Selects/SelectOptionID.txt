@@ -12,7 +12,45 @@ ALTER PROCEDURE [dbo].[SelectOptionID]
 AS
 BEGIN
     -- SET NOCOUNT ON added to prevent extra result sets from
+    -- interfering with SELECT statements.USE [Stock_Information]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[SelectOptionID]
+    @param_stock_id varchar(5)
+AS
+BEGIN
+    -- SET NOCOUNT ON added to prevent extra result sets from
     -- interfering with SELECT statements.
+    SET NOCOUNT ON;
+
+    DECLARE @stock_id AS INT;
+
+    SET @stock_id = TRY_CAST(REPLACE( @param_stock_id, ',', '') AS INT)
+
+    -- Find the maximum date in the "date" column for the given stock_id
+    DECLARE @max_date DATE;
+
+    SELECT @max_date = MAX(date)
+    FROM [Stock_Information].[dbo].[Options]
+    WHERE stock_id = @stock_id;
+
+    -- Retrieve data for the maximum date
+    SELECT 
+        stock_id, date, expiration_date, option_type,
+        strike_price, bid, ask, change, percent_change,
+        volume, open_interest, implied_volatility
+    FROM [Stock_Information].[dbo].[Options]
+    WHERE stock_id = @stock_id AND date = @max_date
+    ORDER BY 
+        option_type ASC, 
+        expiration_date ASC, 
+        strike_price ASC;
+END
     SET NOCOUNT ON;
 
 	DECLARE @stock_id AS INT;
