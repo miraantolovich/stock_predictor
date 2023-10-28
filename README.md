@@ -1,7 +1,7 @@
 # Financial Data Dashboard
 
 ![Dashboard Screenshot](/images/sofi-basic.png)
-![Dashboard Screenshot](/images/intc-basic.png)
+![Dashboard Screenshot](/images/intc-candle.png)
 ![Dashboard Screenshot](/images/aal-indicators.png)
 ![Dashboard Screenshot](/images/cwh-indicators.png)
 
